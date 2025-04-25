@@ -1,5 +1,6 @@
-export * from './chains'
-export * from './configs'
-export * from './cow-error'
-export * from './ipfs'
-export * from './consts'
+/**
+ * Common utilities and types for CoW Protocol SDK
+ * @module @cowprotocol/common
+ */
+
+export * from "./cow-error";

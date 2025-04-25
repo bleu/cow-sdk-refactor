@@ -1,7 +1,7 @@
 {
-  "name": "@cowprotocol/common",
+  "name": "@cowprotocol/config",
   "version": "0.1.0",
-  "description": "Common utilities and types for CoW Protocol SDK",
+  "description": "Configuration constants and settings for CoW Protocol SDK",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -25,5 +25,9 @@
     "typescript": "^5.2.2",
     "vitest": "^0.34.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@cowprotocol/common": "workspace:*",
+    "exponential-backoff": "^3.1.1",
+    "limiter": "^2.1.0"
+  }
 }

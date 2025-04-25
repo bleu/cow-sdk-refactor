@@ -1,6 +1,6 @@
-import { BackoffOptions } from 'exponential-backoff'
-import { RateLimiterOpts } from 'limiter/dist/esm'
-import { SupportedChainId } from './chains'
+import { BackoffOptions } from "exponential-backoff";
+import { RateLimiterOpts } from "limiter";
+import { SupportedChainId } from "./chains";
 
 /**
  * IPFS configuration.
@@ -13,11 +13,11 @@ import { SupportedChainId } from './chains'
  * @property {string} [pinataApiSecret] The API secret to use for Pinata.
  */
 export interface IpfsConfig {
-  uri?: string
-  writeUri?: string
-  readUri?: string
-  pinataApiKey?: string
-  pinataApiSecret?: string
+  uri?: string;
+  writeUri?: string;
+  readUri?: string;
+  pinataApiKey?: string;
+  pinataApiSecret?: string;
 }
 
 /**
@@ -25,19 +25,19 @@ export interface IpfsConfig {
  * @property {BackoffOptions} [backoffOpts] The options to use for the backoff.
  */
 export interface RequestOptions {
-  limiterOpts?: RateLimiterOpts
-  backoffOpts?: BackoffOptions
+  limiterOpts?: RateLimiterOpts;
+  backoffOpts?: BackoffOptions;
 }
 
 /**
  * The environment to use for the Cow API.
  */
-export type CowEnv = 'prod' | 'staging'
+export type CowEnv = "prod" | "staging";
 
 /**
  * Override some properties of the {@link ApiContext}.
  */
-export type PartialApiContext = Partial<ApiContext>
+export type PartialApiContext = Partial<ApiContext>;
 
 /**
  * @property {string} [1] The base URL for the mainnet API.
@@ -46,7 +46,7 @@ export type PartialApiContext = Partial<ApiContext>
  * @property {string} [8453] The base URL for the Base API.
  * @property {string} [11155111] The base URL for the Sepolia testnet API.
  */
-export type ApiBaseUrls = Record<SupportedChainId, string>
+export type ApiBaseUrls = Record<SupportedChainId, string>;
 
 /**
  * Define the context to use for the CoW Protocol API.
@@ -68,22 +68,22 @@ export type ApiBaseUrls = Record<SupportedChainId, string>
  * @property {ApiBaseUrls} [baseUrls] URls that may be used to connect to this context.
  */
 export interface ApiContext {
-  chainId: SupportedChainId
-  env: CowEnv
-  baseUrls?: ApiBaseUrls
-  limiterOpts?: RateLimiterOpts
-  backoffOpts?: BackoffOptions
+  chainId: SupportedChainId;
+  env: CowEnv;
+  baseUrls?: ApiBaseUrls;
+  limiterOpts?: RateLimiterOpts;
+  backoffOpts?: BackoffOptions;
 }
 
 /**
  * The list of available environments.
  */
-export const ENVS_LIST: CowEnv[] = ['prod', 'staging']
+export const ENVS_LIST: CowEnv[] = ["prod", "staging"];
 
 /**
  * The default CoW Protocol API context.
  */
 export const DEFAULT_COW_API_CONTEXT: ApiContext = {
-  env: 'prod',
+  env: "prod",
   chainId: SupportedChainId.MAINNET,
-}
+};
