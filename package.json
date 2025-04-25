@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "cow-sdk",
   "private": true,
   "scripts": {
     "build": "turbo run build",
