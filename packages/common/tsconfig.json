@@ -5,9 +5,9 @@
   },
   "include": [
     "src/**/*",
-    "../config/src/chains.ts",
-    "../config/src/ipfs.ts",
-    "../config/src/configs.ts"
+    "../config/src/chains.ts", // TODO -  review this
+    "../config/src/ipfs.ts", // TODO -  review this
+    "../config/src/configs.ts" // TODO -  review this
   ],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
