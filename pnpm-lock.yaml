@@ -156,6 +156,24 @@ importers:
         specifier: ^0.34.3
         version: 0.34.6
 
+  packages/contracts-ts:
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.31
+        version: 20.17.41
+      eslint:
+        specifier: ^8.48.0
+        version: 8.57.1
+      tsup:
+        specifier: ^7.2.0
+        version: 7.3.0(postcss@8.5.3)(ts-node@10.9.2(@types/node@20.17.41)(typescript@5.8.2))(typescript@5.8.2)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.8.2
+      vitest:
+        specifier: ^0.34.3
+        version: 0.34.6
+
   packages/eslint-config:
     devDependencies:
       '@eslint/js':
@@ -4544,7 +4562,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 22.15.12
+      '@types/node': 20.17.41
 
   '@types/inquirer@6.5.0':
     dependencies:
@@ -4583,7 +4601,7 @@ snapshots:
 
   '@types/through@0.0.33':
     dependencies:
-      '@types/node': 22.15.12
+      '@types/node': 20.17.41
 
   '@types/tinycolor2@1.4.6': {}
 
