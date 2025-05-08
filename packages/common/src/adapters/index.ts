@@ -1,1 +1,1 @@
-export * from "./AbstractProviderAdapter";
+export * from './AbstractProviderAdapter'
