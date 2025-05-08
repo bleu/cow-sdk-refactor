@@ -8,8 +8,16 @@ import {
   Transport,
   Chain,
   getContract as getViemContract,
-  TypedDataDomain,
+  encodeDeployData,
   Abi,
+  getCreate2Address,
+  Hex,
+  Address,
+  concat,
+  stringToBytes,
+  keccak256,
+  TypedDataDomain,
+  GetContractReturnType,
 } from 'viem'
 
 import {
@@ -18,7 +26,6 @@ import {
   TransactionResponse,
   TransactionReceipt,
 } from '@cowprotocol/common'
-import { SignTypedDataParameters } from 'viem/accounts'
 
 export class ViemAdapter implements AbstractProviderAdapter {
   private publicClient: PublicClient
@@ -124,7 +131,7 @@ export class ViemAdapter implements AbstractProviderAdapter {
   async signTypedData(
     domain: TypedDataDomain,
     types: Record<string, unknown>,
-    value: SignTypedDataParameters<Record<string, unknown>>,
+    value: Record<string, unknown>,
   ): Promise<string> {
     if (!this.account) {
       throw new Error('No account provided')
@@ -174,11 +181,52 @@ export class ViemAdapter implements AbstractProviderAdapter {
     return Number(count)
   }
 
-  getContract(address: string, abi: Abi): unknown {
+  getContract(address: string, abi: Abi): GetContractReturnType {
     return getViemContract({
       address: address as `0x${string}`,
       abi,
       client: this.publicClient,
     })
+  }
+
+  encodeDeploy(bytecode: `0x${string}`, abi: Abi): string {
+    return encodeDeployData({
+      abi,
+      bytecode,
+    })
+  }
+
+  getCreate2Address(from: Address, salt: Hex, bytecode: Hex): `0x${string}` {
+    return getCreate2Address({
+      from,
+      salt,
+      bytecode,
+    })
+  }
+
+  hexConcat(items: ReadonlyArray<Hex>): string {
+    return concat(items)
+  }
+
+  formatBytes32String(text: string): string {
+    const bytes = stringToBytes(text)
+    const paddedBytes = this.padBytes(bytes, 32)
+    return paddedBytes
+  }
+
+  keccak256(data: Hex): string {
+    return keccak256(data)
+  }
+
+  private bytesToHex(bytes: Uint8Array): Hex {
+    return `0x${Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')}` as Hex
+  }
+
+  private padBytes(bytes: Uint8Array, length: number): Hex {
+    const result = new Uint8Array(length)
+    result.set(bytes.slice(0, length))
+    return this.bytesToHex(result)
   }
 }

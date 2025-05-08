@@ -1,6 +1,7 @@
-import { ethers } from 'ethers'
+import { BytesLike, ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
 import { AbstractProviderAdapter, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { DeploymentArguments } from '@cowprotocol/contracts-ts'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
 
@@ -110,5 +111,30 @@ export class EthersV5Adapter implements AbstractProviderAdapter {
 
   getContract(address: string, abi: Abi): unknown {
     return new ethers.Contract(address, abi, this.signer)
+  }
+
+  createInterface(abi: Abi): ethers.utils.Interface {
+    return new ethers.utils.Interface(abi)
+  }
+
+  getCreate2Address(from: string, salt: BytesLike, initCodeHash: BytesLike): string {
+    return ethers.utils.getCreate2Address(from, salt, initCodeHash)
+  }
+
+  hexConcat(items: ReadonlyArray<BytesLike>): string {
+    return ethers.utils.hexConcat(items)
+  }
+
+  formatBytes32String(text: string): string {
+    return ethers.utils.formatBytes32String(text)
+  }
+
+  encodeDeploy<C>(encodeDeployArgs: DeploymentArguments<C>, abi: Abi) {
+    const contractInterface = new ethers.utils.Interface(abi)
+    return contractInterface.encodeDeploy(encodeDeployArgs)
+  }
+
+  keccak256(data: BytesLike) {
+    return ethers.utils.keccak256(data)
   }
 }

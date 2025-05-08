@@ -1,10 +1,4 @@
-import { utils } from "ethers";
-
-/**
- * The salt used when deterministically deploying smart contracts.
- */
-export const SALT = utils.formatBytes32String("Mattresses in Berlin!");
-
+import { Abi } from "@cowprotocol/common";
 /**
  * The contract used to deploy contracts deterministically with CREATE2.
  * The address is chosen by the hardhat-deploy library.
@@ -34,13 +28,12 @@ export type DeploymentArguments<T> =
   T extends typeof CONTRACT_NAMES.authenticator
     ? never
     : T extends typeof CONTRACT_NAMES.settlement
-    ? [string, string]
-    : unknown[];
+      ? [string, string]
+      : unknown[];
 
 /**
  * Allowed ABI definition types by Ethers.js.
  */
-export type Abi = ConstructorParameters<typeof utils.Interface>[0];
 
 /**
  * Artifact information important for computing deterministic deployments.
@@ -59,31 +52,6 @@ export interface NamedArtifactDeployment<C extends ContractName>
   contractName: C;
 }
 
-type MaybeNamedArtifactArtifactDeployment<C> = C extends ContractName
+export type MaybeNamedArtifactArtifactDeployment<C> = C extends ContractName
   ? NamedArtifactDeployment<C>
   : ArtifactDeployment;
-
-/**
- * Computes the deterministic address at which the contract will be deployed.
- * This address does not depend on which network the contract is deployed to.
- *
- * @param contractName Name of the contract for which to find the address.
- * @param deploymentArguments Extra arguments that are necessary to deploy.
- * @returns The address that is expected to store the deployed code.
- */
-export function deterministicDeploymentAddress<C>(
-  { abi, bytecode }: MaybeNamedArtifactArtifactDeployment<C>,
-  deploymentArguments: DeploymentArguments<C>,
-): string {
-  const contractInterface = new utils.Interface(abi);
-  const deployData = utils.hexConcat([
-    bytecode,
-    contractInterface.encodeDeploy(deploymentArguments),
-  ]);
-
-  return utils.getCreate2Address(
-    DEPLOYER_CONTRACT,
-    SALT,
-    utils.keccak256(deployData),
-  );
-}

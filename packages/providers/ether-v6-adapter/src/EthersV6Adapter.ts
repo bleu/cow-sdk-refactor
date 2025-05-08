@@ -1,4 +1,20 @@
-import { Provider, Signer, Contract, VoidSigner, JsonRpcSigner, Wallet, Interface, TypedDataField } from 'ethers'
+import {
+  Provider,
+  Signer,
+  Contract,
+  VoidSigner,
+  JsonRpcSigner,
+  Wallet,
+  Interface,
+  TypedDataField,
+  AbiCoder,
+  getCreate2Address,
+  concat,
+  BytesLike,
+  encodeBytes32String,
+  toUtf8Bytes,
+  keccak256,
+} from 'ethers'
 import {
   AbstractProviderAdapter,
   TransactionParams,
@@ -8,6 +24,7 @@ import {
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 import { TypedDataDomain } from 'ethers'
+import { DeploymentArguments } from '@cowprotocol/contracts-ts'
 
 export class EthersV6Adapter implements AbstractProviderAdapter {
   private provider: Provider
@@ -115,5 +132,61 @@ export class EthersV6Adapter implements AbstractProviderAdapter {
 
   getContract(address: string, abi: Abi): Contract {
     return new Contract(address, abi, this.signer)
+  }
+
+  encodeDeploy<C>(encodeDeployArgs: DeploymentArguments<C>, abi: Abi): string {
+    const abiCoder = new AbiCoder()
+    const contractInterface = new Interface(abi)
+
+    // Get the constructor fragment
+    const constructorFragment = contractInterface.getFunction('constructor')
+
+    if (!constructorFragment) {
+      // No constructor parameters, return empty string
+      return '0x'
+    }
+
+    // Encode the constructor parameters
+    return abiCoder.encode(constructorFragment.inputs, encodeDeployArgs as readonly unknown[])
+  }
+
+  getCreate2Address(from: string, salt: BytesLike, initCodeHash: BytesLike): string {
+    // Convert BytesLike to ethers BytesLike if necessary
+    const ethersSalt = this.toEthersBytesLike(salt)
+    const ethersInitCodeHash = this.toEthersBytesLike(initCodeHash)
+
+    // Use ethers getCreate2Address
+    return getCreate2Address(from, ethersSalt, ethersInitCodeHash)
+  }
+
+  hexConcat(items: ReadonlyArray<BytesLike>): string {
+    // Convert each BytesLike to ethers BytesLike
+    const ethersItems = items.map((item) => this.toEthersBytesLike(item))
+
+    // Use ethers concat
+    return concat(ethersItems)
+  }
+
+  formatBytes32String(text: string): string {
+    return encodeBytes32String(text)
+  }
+
+  keccak256(data: BytesLike): string {
+    return keccak256(this.toEthersBytesLike(data))
+  }
+
+  // Helper method to convert our BytesLike to ethers BytesLike
+  private toEthersBytesLike(data: BytesLike): BytesLike {
+    if (typeof data === 'string') {
+      if (data.startsWith('0x')) {
+        return data
+      }
+      // Convert string to bytes
+      return toUtf8Bytes(data)
+    } else if (data instanceof Uint8Array) {
+      return data
+    } else {
+      throw new Error('Unsupported data type for conversion to BytesLike')
+    }
   }
 }

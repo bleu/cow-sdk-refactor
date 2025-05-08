@@ -1,3 +1,5 @@
+import { Abi, BytesLike } from './types'
+
 /**
  * AbstractProviderAdapter defines the common interface that all provider-specific
  * implementations must follow. This ensures consistent interaction with different
@@ -24,6 +26,13 @@ export interface AbstractProviderAdapter {
 
   // Contract interaction
   getContract(address: string, abi: unknown): unknown
+
+  // Utils
+  getCreate2Address(from: string, salt: BytesLike, initCodeHash: BytesLike): string
+  hexConcat(items: ReadonlyArray<BytesLike>): string
+  formatBytes32String(text: string): string
+  keccak256(data: BytesLike): string
+  encodeDeploy(encodeDeployArgs: unknown, abi: Abi): string
 }
 
 /**
