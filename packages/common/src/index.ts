@@ -4,3 +4,4 @@
  */
 
 export * from "./cow-error";
+export * from "./adapters";
