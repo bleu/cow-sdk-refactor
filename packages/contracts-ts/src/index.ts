@@ -3,7 +3,7 @@
  * @module @cowprotocol/contracts-ts
  */
 
-import { TypedDataDomain } from "./types/ethers";
+import { TypedDataDomain } from './types/ethers'
 
 /**
  * Return the Gnosis Protocol v2 domain used for signing.
@@ -12,24 +12,22 @@ import { TypedDataDomain } from "./types/ethers";
  * signature.
  * @return An EIP-712 compatible typed domain data.
  */
-export function domain(
-  chainId: number,
-  verifyingContract: string
-): TypedDataDomain {
+export function domain(chainId: number, verifyingContract: string): TypedDataDomain {
   return {
-    name: "Gnosis Protocol",
-    version: "v2",
+    name: 'Gnosis Protocol',
+    version: 'v2',
     chainId,
     verifyingContract,
-  };
+  }
 }
 
-export * from "./deploy";
-export * from "./interaction";
-export * from "./order";
-export * from "./proxy";
-export * from "./settlement";
-export * from "./sign";
-export * from "./swap";
-export * from "./vault";
-export * from "./types/ethers";
+export * from './deploy'
+export * from './interaction'
+export * from './order'
+export * from './proxy'
+export * from './settlement'
+export * from './sign'
+export * from './swap'
+export * from './vault'
+export * from './types/ethers'
+export * from './ContractsTs'
