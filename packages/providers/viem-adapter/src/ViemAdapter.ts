@@ -8,59 +8,53 @@ import {
   Transport,
   Chain,
   getContract as getViemContract,
-} from "viem";
+  TypedDataDomain,
+  Abi,
+} from 'viem'
 
 import {
   AbstractProviderAdapter,
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
-} from "@cowprotocol/common";
+} from '@cowprotocol/common'
+import { SignTypedDataParameters } from 'viem/accounts'
 
 export class ViemAdapter implements AbstractProviderAdapter {
-  private publicClient: PublicClient;
-  private walletClient: WalletClient;
-  private account?: Account;
+  private publicClient: PublicClient
+  private walletClient: WalletClient
+  private account?: Account
 
-  constructor(
-    chain: Chain,
-    transport: Transport = http(),
-    account?: Account | `0x${string}`
-  ) {
+  constructor(chain: Chain, transport: Transport = http(), account?: Account | `0x${string}`) {
     this.publicClient = createPublicClient({
       chain,
       transport,
-    });
+    })
 
     this.walletClient = createWalletClient({
       chain,
       transport,
-    });
+    })
 
     if (account) {
-      this.account =
-        typeof account === "string"
-          ? ({ address: account } as Account)
-          : account;
+      this.account = typeof account === 'string' ? ({ address: account } as Account) : account
     }
   }
 
   async getChainId(): Promise<number> {
-    return this.publicClient.chain?.id ?? 0; //TODO - verify if this is correct
+    return this.publicClient.chain?.id ?? 0 //TODO - verify if this is correct
   }
 
   async getAddress(): Promise<string> {
     if (!this.account) {
-      throw new Error("No account provided");
+      throw new Error('No account provided')
     }
-    return this.account.address;
+    return this.account.address
   }
 
-  async sendTransaction(
-    txParams: TransactionParams
-  ): Promise<TransactionResponse> {
+  async sendTransaction(txParams: TransactionParams): Promise<TransactionResponse> {
     if (!this.account) {
-      throw new Error("No account provided");
+      throw new Error('No account provided')
     }
 
     const hash = await this.walletClient.sendTransaction({
@@ -70,30 +64,26 @@ export class ViemAdapter implements AbstractProviderAdapter {
       data: txParams.data as `0x${string}` | undefined,
       value: txParams.value ? BigInt(txParams.value.toString()) : undefined,
       gas: txParams.gasLimit ? BigInt(txParams.gasLimit.toString()) : undefined,
-      maxFeePerGas: txParams.maxFeePerGas
-        ? BigInt(txParams.maxFeePerGas.toString())
-        : undefined,
+      maxFeePerGas: txParams.maxFeePerGas ? BigInt(txParams.maxFeePerGas.toString()) : undefined,
       maxPriorityFeePerGas: txParams.maxPriorityFeePerGas
         ? BigInt(txParams.maxPriorityFeePerGas.toString())
         : undefined,
       nonce: txParams.nonce,
-    });
+    })
 
     return {
       hash,
-      wait: async (
-        confirmations?: number | undefined
-      ): Promise<TransactionReceipt> => {
+      wait: async (confirmations?: number | undefined): Promise<TransactionReceipt> => {
         const receipt = await this.publicClient.waitForTransactionReceipt({
           hash,
           confirmations: confirmations ?? 1,
-        });
+        })
 
         return {
           transactionHash: receipt.transactionHash,
           blockNumber: Number(receipt.blockNumber),
           blockHash: receipt.blockHash,
-          status: receipt.status === "success" ? 1 : 0,
+          status: receipt.status === 'success' ? 1 : 0,
           gasUsed: Number(receipt.gasUsed),
           logs: receipt.logs,
           contractAddress: receipt.contractAddress,
@@ -104,9 +94,9 @@ export class ViemAdapter implements AbstractProviderAdapter {
           type: receipt.type,
           transactionIndex: receipt.transactionIndex,
           logsBloom: receipt.logsBloom,
-        } as unknown as TransactionReceipt; //TODO - review this
+        } as unknown as TransactionReceipt //TODO - review this
       },
-    };
+    }
   }
 
   async estimateGas(txParams: TransactionParams): Promise<bigint> {
@@ -115,31 +105,34 @@ export class ViemAdapter implements AbstractProviderAdapter {
       to: txParams.to as `0x${string}`,
       data: txParams.data as `0x${string}` | undefined,
       value: txParams.value ? BigInt(txParams.value.toString()) : undefined,
-    });
+    })
   }
 
   async signMessage(message: string | Uint8Array): Promise<string> {
     if (!this.account) {
-      throw new Error("No account provided");
+      throw new Error('No account provided')
     }
 
-    const messageToSign =
-      typeof message === "string" ? message : new TextDecoder().decode(message);
+    const messageToSign = typeof message === 'string' ? message : new TextDecoder().decode(message)
 
     return this.walletClient.signMessage({
       account: this.account,
       message: messageToSign,
-    });
+    })
   }
 
-  async signTypedData(domain: any, types: any, value: any): Promise<string> {
+  async signTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, unknown>,
+    value: SignTypedDataParameters<Record<string, unknown>>,
+  ): Promise<string> {
     if (!this.account) {
-      throw new Error("No account provided");
+      throw new Error('No account provided')
     }
 
-    const primaryType = Object.keys(types)[0];
+    const primaryType = Object.keys(types)[0]
     if (!primaryType) {
-      throw new Error("No primary type found in types");
+      throw new Error('No primary type found in types')
     }
 
     return this.walletClient.signTypedData({
@@ -148,7 +141,7 @@ export class ViemAdapter implements AbstractProviderAdapter {
       types,
       primaryType,
       message: value,
-    });
+    })
   }
 
   async call(txParams: TransactionParams): Promise<string> {
@@ -157,35 +150,35 @@ export class ViemAdapter implements AbstractProviderAdapter {
       to: txParams.to as `0x${string}`,
       data: txParams.data as `0x${string}` | undefined,
       value: txParams.value ? BigInt(txParams.value.toString()) : undefined,
-    });
-    return result.toString();
+    })
+    return result.toString()
   }
 
   async getCode(address: string): Promise<string> {
     const code = await this.publicClient.getCode({
       address: address as `0x${string}`,
-    });
-    return code ?? "0x"; //TODO - review this
+    })
+    return code ?? '0x' //TODO - review this
   }
 
   async getBalance(address: string): Promise<bigint> {
     return this.publicClient.getBalance({
       address: address as `0x${string}`,
-    });
+    })
   }
 
   async getTransactionCount(address: string): Promise<number> {
     const count = await this.publicClient.getTransactionCount({
       address: address as `0x${string}`,
-    });
-    return Number(count);
+    })
+    return Number(count)
   }
 
-  getContract(address: string, abi: any): any {
+  getContract(address: string, abi: Abi): unknown {
     return getViemContract({
       address: address as `0x${string}`,
       abi,
       client: this.publicClient,
-    });
+    })
   }
 }

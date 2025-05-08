@@ -3,7 +3,7 @@
  * @module @cowprotocol/config
  */
 
-export * from "./chains";
-export * from "./consts";
-export * from "./configs";
-export * from "./ipfs";
+export * from './chains'
+export * from './consts'
+export * from './configs'
+export * from './ipfs'
