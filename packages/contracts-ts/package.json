@@ -18,6 +18,9 @@
     "test:watch": "vitest",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
+  "dependencies": {
+    "@cowprotocol/common": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^20.17.31",
     "eslint": "^8.48.0",
