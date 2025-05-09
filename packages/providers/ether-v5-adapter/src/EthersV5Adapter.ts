@@ -1,15 +1,26 @@
-import { BytesLike, ethers } from 'ethers'
+import { BigNumberish, BytesLike, ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
-import { AbstractProviderAdapter, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { AbstractProviderAdapter, AdapterTypes, TransactionParams, TransactionResponse } from '@cowprotocol/common'
 import { DeploymentArguments } from '@cowprotocol/contracts-ts'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
+type Interface = ethers.utils.Interface
 
-export class EthersV5Adapter implements AbstractProviderAdapter {
+interface EthersV5Types extends AdapterTypes {
+  Abi: Abi
+  Bytes: BytesLike
+  BigIntish: BigNumberish
+  ContractInterface: Interface
+}
+
+export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
+  declare protected _type?: EthersV5Types
+
   private provider: ethers.providers.Provider
   private signer: ethers.Signer & TypedDataSigner
 
   constructor(providerOrSigner: ethers.providers.Provider | ethers.Signer) {
+    super()
     if (ethers.Signer.isSigner(providerOrSigner)) {
       this.signer = providerOrSigner as ethers.Signer & TypedDataSigner
       this.provider = providerOrSigner.provider as ethers.providers.Provider

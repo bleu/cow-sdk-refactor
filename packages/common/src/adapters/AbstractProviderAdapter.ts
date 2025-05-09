@@ -1,38 +1,40 @@
-import { Abi, BytesLike } from './types'
+import type { AdapterTypes } from './types'
 
 /**
  * AbstractProviderAdapter defines the common interface that all provider-specific
  * implementations must follow. This ensures consistent interaction with different
  * Ethereum libraries throughout the SDK.
  */
-export interface AbstractProviderAdapter {
+export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTypes> {
+  protected _type?: T
+
   // Core functionality
-  getChainId(): Promise<number>
-  getAddress(): Promise<string>
+  abstract getChainId(): Promise<number>
+  abstract getAddress(): Promise<string>
 
   // Transaction handling
-  sendTransaction(txParams: TransactionParams): Promise<TransactionResponse>
-  estimateGas(txParams: TransactionParams): Promise<bigint>
+  abstract sendTransaction(txParams: TransactionParams): Promise<TransactionResponse>
+  abstract estimateGas(txParams: TransactionParams): Promise<bigint>
 
   // Signing operations
-  signMessage(message: string | Uint8Array): Promise<string>
-  signTypedData(domain: unknown, types: unknown, value: unknown): Promise<string>
+  abstract signMessage(message: string | Uint8Array): Promise<string>
+  abstract signTypedData(domain: unknown, types: unknown, value: unknown): Promise<string>
 
   // Data retrieval
-  call(txParams: TransactionParams): Promise<string>
-  getCode(address: string): Promise<string>
-  getBalance(address: string): Promise<bigint>
-  getTransactionCount(address: string): Promise<number>
+  abstract call(txParams: TransactionParams): Promise<string>
+  abstract getCode(address: string): Promise<string>
+  abstract getBalance(address: string): Promise<bigint>
+  abstract getTransactionCount(address: string): Promise<number>
 
   // Contract interaction
-  getContract(address: string, abi: unknown): unknown
+  abstract getContract(address: string, abi: unknown): unknown
 
   // Utils
-  getCreate2Address(from: string, salt: BytesLike, initCodeHash: BytesLike): string
-  hexConcat(items: ReadonlyArray<BytesLike>): string
-  formatBytes32String(text: string): string
-  keccak256(data: BytesLike): string
-  encodeDeploy(encodeDeployArgs: unknown, abi: Abi): string
+  abstract getCreate2Address(from: string, salt: T['Bytes'], initCodeHash: T['Bytes']): string
+  abstract hexConcat(items: ReadonlyArray<T['Bytes']>): string
+  abstract formatBytes32String(text: string): string
+  abstract keccak256(data: T['Bytes']): string
+  abstract encodeDeploy(encodeDeployArgs: unknown, abi: T['Abi']): string
 }
 
 /**

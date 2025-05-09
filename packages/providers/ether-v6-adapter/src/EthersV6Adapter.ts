@@ -14,23 +14,35 @@ import {
   encodeBytes32String,
   toUtf8Bytes,
   keccak256,
+  BigNumberish,
 } from 'ethers'
 import {
   AbstractProviderAdapter,
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
+  AdapterTypes,
 } from '@cowprotocol/common'
-
-type Abi = ConstructorParameters<typeof Interface>[0]
 import { TypedDataDomain } from 'ethers'
 import { DeploymentArguments } from '@cowprotocol/contracts-ts'
 
-export class EthersV6Adapter implements AbstractProviderAdapter {
+type Abi = ConstructorParameters<typeof Interface>[0]
+
+interface EthersV6Types extends AdapterTypes {
+  Abi: Abi
+  Bytes: BytesLike
+  BigIntish: BigNumberish
+  ContractInterface: Interface
+}
+
+export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
+  declare protected _type?: EthersV6Types
+
   private provider: Provider
   private signer: Signer
 
   constructor(providerOrSigner: Provider | Signer) {
+    super()
     if (
       providerOrSigner instanceof JsonRpcSigner ||
       providerOrSigner instanceof VoidSigner ||

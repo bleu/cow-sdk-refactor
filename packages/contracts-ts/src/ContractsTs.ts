@@ -1,11 +1,11 @@
-import { AbstractProviderAdapter } from '@cowprotocol/common'
+import { AbstractProviderAdapter, AdapterTypes } from '@cowprotocol/common'
 import { DeploymentArguments, MaybeNamedArtifactArtifactDeployment } from './deploy'
 
-export class ContractsTs {
+export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   SALT: string
   DEPLOYER_CONTRACT: string
 
-  constructor(private adapter: AbstractProviderAdapter) {
+  constructor(private adapter: AbstractProviderAdapter<T>) {
     this.adapter = adapter
     this.SALT = this.adapter.formatBytes32String('Mattresses in Berlin!')
     this.DEPLOYER_CONTRACT = '0x4e59b44847b379578588920ca78fbf26c0b4956c'
@@ -24,7 +24,7 @@ export class ContractsTs {
     { abi, bytecode }: MaybeNamedArtifactArtifactDeployment<C>,
     deploymentArguments: DeploymentArguments<C>,
   ): string {
-    const deployData = adapter.hexConcat([bytecode, this.adapter.encodeDeploy(deploymentArguments, abi)])
+    const deployData = adapter.hexConcat([bytecode, this.adapter.encodeDeploy(deploymentArguments, abi as T['Abi'])])
 
     return adapter.getCreate2Address(this.DEPLOYER_CONTRACT, this.SALT, this.adapter.keccak256(deployData))
   }

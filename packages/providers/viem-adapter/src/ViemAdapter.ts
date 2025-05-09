@@ -25,14 +25,24 @@ import {
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
+  AdapterTypes,
 } from '@cowprotocol/common'
 
-export class ViemAdapter implements AbstractProviderAdapter {
+interface ViemTypes extends AdapterTypes {
+  Abi: Abi
+  Bytes: `0x${string}`
+  BigIntish: bigint
+  ContractInterface: unknown
+}
+
+export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
+  declare protected _type?: ViemTypes
   private publicClient: PublicClient
   private walletClient: WalletClient
   private account?: Account
 
   constructor(chain: Chain, transport: Transport = http(), account?: Account | `0x${string}`) {
+    super()
     this.publicClient = createPublicClient({
       chain,
       transport,
