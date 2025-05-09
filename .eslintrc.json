@@ -4,7 +4,6 @@
     "prettier",
     "plugin:prettier/recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
   ],
   "plugins": ["prettier", "unused-imports"],
   "rules": {
@@ -21,6 +20,6 @@
       }
     ]
   },
-
+  "eol-last": ["error", "always"],
   "ignorePatterns": ["dist", "node_modules", "src/subgraph/graphql.ts", "examples", "schemas"]
 }
