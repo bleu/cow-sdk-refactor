@@ -15,6 +15,12 @@ import {
   toUtf8Bytes,
   keccak256,
   BigNumberish,
+  ZeroAddress,
+  zeroPadValue,
+  getBytes,
+  hexlify as ethersHexlify,
+  solidityPacked,
+  TypedDataEncoder,
 } from 'ethers'
 import {
   AbstractProviderAdapter,
@@ -25,15 +31,18 @@ import {
 } from '@cowprotocol/common'
 import { TypedDataDomain } from 'ethers'
 import { DeploymentArguments } from '@cowprotocol/contracts-ts'
+import { getAddress } from 'ethers/lib/utils'
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 
 interface EthersV6Types extends AdapterTypes {
   Abi: Abi
+  Address: string
   Bytes: BytesLike
   BigIntish: BigNumberish
   ContractInterface: Interface
   TypedDataDomain: TypedDataDomain
+  TypedDataTypes: Record<string, TypedDataField[]>
 }
 
 export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
@@ -44,6 +53,7 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
 
   constructor(providerOrSigner: Provider | Signer) {
     super()
+    this.ZERO_ADDRESS = ZeroAddress
     if (
       providerOrSigner instanceof JsonRpcSigner ||
       providerOrSigner instanceof VoidSigner ||
@@ -201,5 +211,39 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
     } else {
       throw new Error('Unsupported data type for conversion to BytesLike')
     }
+  }
+
+  hexZeroPad(value: BytesLike, length: number): string {
+    return zeroPadValue(value, length)
+  }
+
+  arrayify(hexString: string): Uint8Array {
+    return getBytes(hexString)
+  }
+
+  hexlify(value: Uint8Array): string {
+    return ethersHexlify(value)
+  }
+
+  //eslint-disable-next-line
+  solidityPack(types: string[], values: any[]): string {
+    return solidityPacked(types, values)
+  }
+
+  hashTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, TypedDataField[]>,
+    data: Record<string, unknown>,
+  ): string {
+    return TypedDataEncoder.hash(domain, types, data)
+  }
+
+  getChecksumAddress(address: string): string {
+    return getAddress(address)
+  }
+
+  // Add getter for _TypedDataEncoder to match the ethers v5 interface
+  get _TypedDataEncoder() {
+    return TypedDataEncoder
   }
 }

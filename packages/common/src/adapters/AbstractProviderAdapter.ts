@@ -8,6 +8,8 @@ import type { AdapterTypes } from './types'
 export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTypes> {
   protected _type?: T
 
+  public ZERO_ADDRESS!: T['Address']
+
   // Core functionality
   abstract getChainId(): Promise<number>
   abstract getAddress(): Promise<string>
@@ -35,6 +37,17 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
   abstract formatBytes32String(text: string): string
   abstract keccak256(data: T['Bytes']): string
   abstract encodeDeploy(encodeDeployArgs: unknown, abi: T['Abi']): string
+  abstract hexZeroPad(value: T['Bytes'], length: number): string
+  abstract arrayify(hexString: string): Uint8Array
+  abstract hexlify(value: T['Bytes']): string
+  // eslint-disable-next-line
+  abstract solidityPack(types: string[], values: any[]): string
+  abstract hashTypedData(
+    domain: T['TypedDataDomain'],
+    types: T['TypedDataTypes'],
+    data: Record<string, unknown>,
+  ): string
+  abstract getChecksumAddress(address: T['Address']): T['Address']
 }
 
 /**

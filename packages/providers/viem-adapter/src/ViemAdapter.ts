@@ -18,6 +18,12 @@ import {
   keccak256,
   TypedDataDomain,
   GetContractReturnType,
+  zeroAddress,
+  padHex,
+  hexToBytes,
+  encodePacked,
+  hashTypedData,
+  getAddress,
 } from 'viem'
 
 import {
@@ -30,10 +36,12 @@ import {
 
 interface ViemTypes extends AdapterTypes {
   Abi: Abi
+  Address: Address
   Bytes: `0x${string}`
   BigIntish: bigint
   ContractInterface: unknown
   TypedDataDomain: TypedDataDomain
+  TypedDataTypes: Record<string, unknown>
 }
 
 export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
@@ -44,6 +52,7 @@ export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
 
   constructor(chain: Chain, transport: Transport = http(), account?: Account | `0x${string}`) {
     super()
+    this.ZERO_ADDRESS = zeroAddress
     this.publicClient = createPublicClient({
       chain,
       transport,
@@ -239,5 +248,39 @@ export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
     const result = new Uint8Array(length)
     result.set(bytes.slice(0, length))
     return this.bytesToHex(result)
+  }
+
+  hexZeroPad(value: Hex, length: number): string {
+    return padHex(value, { size: length })
+  }
+
+  arrayify(hexString: string): Uint8Array {
+    return hexToBytes(hexString as Hex)
+  }
+
+  hexlify(value: `0x${string}`): string {
+    return value
+  }
+
+  solidityPack(types: string[], values: unknown[]): string {
+    return encodePacked(types, values)
+  }
+
+  hashTypedData(domain: TypedDataDomain, types: Record<string, unknown>, data: Record<string, unknown>): string {
+    const primaryType = Object.keys(types)[0]
+    if (!primaryType) {
+      throw new Error('No primary type found in types')
+    }
+
+    return hashTypedData({
+      domain,
+      types: types as Record<string, unknown>,
+      primaryType,
+      message: data,
+    })
+  }
+
+  getChecksumAddress(address: Address): Address {
+    return getAddress(address)
   }
 }

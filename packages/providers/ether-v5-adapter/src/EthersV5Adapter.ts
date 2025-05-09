@@ -8,10 +8,12 @@ type Interface = ethers.utils.Interface
 
 interface EthersV5Types extends AdapterTypes {
   Abi: Abi
+  Address: string
   Bytes: BytesLike
   BigIntish: BigNumberish
   ContractInterface: Interface
   TypedDataDomain: TypedDataDomain
+  TypedDataTypes: Record<string, TypedDataField[]>
 }
 
 export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
@@ -22,6 +24,7 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
 
   constructor(providerOrSigner: ethers.providers.Provider | ethers.Signer) {
     super()
+    this.ZERO_ADDRESS = ethers.constants.AddressZero
     if (ethers.Signer.isSigner(providerOrSigner)) {
       this.signer = providerOrSigner as ethers.Signer & TypedDataSigner
       this.provider = providerOrSigner.provider as ethers.providers.Provider
@@ -148,5 +151,34 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
 
   keccak256(data: BytesLike) {
     return ethers.utils.keccak256(data)
+  }
+
+  hexZeroPad(value: BytesLike, length: number): string {
+    return ethers.utils.hexZeroPad(value, length)
+  }
+
+  arrayify(hexString: string): Uint8Array {
+    return ethers.utils.arrayify(hexString)
+  }
+
+  hexlify(value: BytesLike): string {
+    return ethers.utils.hexlify(value)
+  }
+
+  // eslint-disable-next-line
+  solidityPack(types: string[], values: any[]): string {
+    return ethers.utils.solidityPack(types, values)
+  }
+
+  hashTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, TypedDataField[]>,
+    data: Record<string, unknown>,
+  ): string {
+    return ethers.utils._TypedDataEncoder.hash(domain, types, data)
+  }
+
+  getChecksumAddress(address: string): string {
+    return ethers.utils.getAddress(address)
   }
 }
