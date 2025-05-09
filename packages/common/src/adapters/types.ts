@@ -6,9 +6,12 @@ export type Bytes = unknown
 
 export type ContractInterface = unknown
 
+export type TypedDataDomain = unknown
+
 export type AdapterTypes<Abi = unknown, BigIntish = unknown, Bytes = unknown, ContractInterface = unknown> = {
   Abi: Abi
   BigIntish: BigIntish
   Bytes: Bytes
   ContractInterface: ContractInterface
+  TypedDataDomain: TypedDataDomain
 }

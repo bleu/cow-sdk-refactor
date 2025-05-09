@@ -33,6 +33,7 @@ interface EthersV6Types extends AdapterTypes {
   Bytes: BytesLike
   BigIntish: BigNumberish
   ContractInterface: Interface
+  TypedDataDomain: TypedDataDomain
 }
 
 export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {

@@ -53,5 +53,21 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
     return normalizeInteractions<T['BigIntish'], T['Bytes']>(interactions)
   }
 
+  /**
+   * Return the Gnosis Protocol v2 domain used for signing.
+   * @param chainId The EIP-155 chain ID.
+   * @param verifyingContract The address of the contract that will verify the
+   * signature.
+   * @return An EIP-712 compatible typed domain data.
+   */
+  public domain(chainId: number, verifyingContract: string): T['TypedDataDomain'] {
+    return {
+      name: 'Gnosis Protocol',
+      version: 'v2',
+      chainId,
+      verifyingContract,
+    }
+  }
+
   // ... other methods from contracts-ts that need adapter
 }

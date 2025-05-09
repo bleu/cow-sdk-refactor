@@ -11,6 +11,7 @@ interface EthersV5Types extends AdapterTypes {
   Bytes: BytesLike
   BigIntish: BigNumberish
   ContractInterface: Interface
+  TypedDataDomain: TypedDataDomain
 }
 
 export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {

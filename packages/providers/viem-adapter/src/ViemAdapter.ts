@@ -33,6 +33,7 @@ interface ViemTypes extends AdapterTypes {
   Bytes: `0x${string}`
   BigIntish: bigint
   ContractInterface: unknown
+  TypedDataDomain: TypedDataDomain
 }
 
 export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
