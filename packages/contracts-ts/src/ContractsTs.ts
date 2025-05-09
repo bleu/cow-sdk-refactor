@@ -117,7 +117,7 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
    * @param hashLike A hash-like value to normalize.
    * @returns A 32-byte hash encoded as a hex-string.
    */
-  public normalizeOrder<T extends AdapterTypes>(order: Order<T>): NormalizedOrder<T> {
+  public normalizeOrder(order: Order<T>): NormalizedOrder<T> {
     if (order.receiver === this.adapter.ZERO_ADDRESS) {
       throw new Error('receiver cannot be address(0)')
     }
@@ -140,7 +140,7 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
    * @param types The order to compute the digest for.
    * @return Hex-encoded 32-byte order digest.
    */
-  public hashTypedData<T extends AdapterTypes>(
+  public hashTypedData(
     domain: T['TypedDataDomain'],
     types: T['TypedDataTypes'],
     data: Record<string, unknown>,
@@ -155,14 +155,14 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
    * @param order The order to compute the digest for.
    * @return Hex-encoded 32-byte order digest.
    */
-  public hashOrder<T extends AdapterTypes>(domain: T['TypedDataDomain'], order: Order<T>): string {
+  public hashOrder(domain: T['TypedDataDomain'], order: Order<T>): string {
     return this.hashTypedData(domain, { Order: ORDER_TYPE_FIELDS }, this.normalizeOrder(order))
   }
 
   /**
    * Computes the order UID for an order and the given owner.
    */
-  public computeOrderUid<T extends AdapterTypes>(domain: T['TypedDataDomain'], order: Order<T>, owner: string): string {
+  public computeOrderUid(domain: T['TypedDataDomain'], order: Order<T>, owner: string): string {
     return this.packOrderUidParams({
       orderDigest: this.hashOrder(domain, order),
       owner,
