@@ -8,6 +8,8 @@ import {
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 import { TypedDataDomain } from 'ethers'
+import { EthersV6AppDataUtils } from './EthersV6AppDataUtils'
+import { AppDataUtils } from '@cowprotocol/common'
 
 export class EthersV6Adapter implements AbstractProviderAdapter {
   private provider: Provider
@@ -115,5 +117,9 @@ export class EthersV6Adapter implements AbstractProviderAdapter {
 
   getContract(address: string, abi: Abi): Contract {
     return new Contract(address, abi, this.signer)
+  }
+
+  getAppDataUtils(): AppDataUtils {
+    return new EthersV6AppDataUtils()
   }
 }
