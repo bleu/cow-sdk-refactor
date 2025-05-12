@@ -1,36 +1,71 @@
+import { AbstractProviderAdapter, getGlobalAdapter } from '@cowprotocol/common'
+import { AnyAppDataDocVersion } from '../generatedTypes'
+import { AppDataInfo } from '../types'
 import { appDataHexToCid, appDataHexToCidLegacy } from './appDataHexToCid'
-import { getAppDataInfo, getAppDataInfoLegacy } from './getAppDataInfo'
 import { cidToAppDataHex } from './cidToAppDataHex'
 import { fetchDocFromAppDataHex, fetchDocFromAppDataHexLegacy } from './fetchDocFromAppData'
 import { fetchDocFromCid } from './fetchDocFromCid'
 
 import { generateAppDataDoc } from './generateAppDataDoc'
+import { getAppDataInfo, getAppDataInfoLegacy } from './getAppDataInfo'
 import { getAppDataSchema } from './getAppDataSchema'
 import { uploadMetadataDocToIpfsLegacy } from './uploadMetadataDocToIpfsLegacy'
 import { validateAppDataDoc } from './validateAppDataDoc'
 
-export class MetadataApi {
+/**
+ * AppDataApi provides a convenient interface for interacting with CoW Protocol's
+ * app-data functionality. It supports both direct method calls and object-oriented usage.
+ */
+export class AppDataApi {
+  private adapter?: AbstractProviderAdapter
+
+  /**
+   * Creates a new AppDataApi instance
+   *
+   * @param adapter Provider adapter implementation
+   */
+  constructor(adapter?: AbstractProviderAdapter) {
+    if (adapter) {
+      // It's an adapter
+      this.adapter = adapter
+    } else {
+      // Use global adapter
+      this.adapter = getGlobalAdapter()
+    }
+  }
+
   // Schema & Doc generation/validation
   getAppDataSchema = getAppDataSchema
   generateAppDataDoc = generateAppDataDoc
   validateAppDataDoc = validateAppDataDoc
 
   // appData / CID conversion
-  getAppDataInfo = getAppDataInfo // (appData | fullAppData) -->  { cid, appDataHex, appDataContent }
-  appDataHexToCid = appDataHexToCid // appDataHex --> cid
-  cidToAppDataHex = cidToAppDataHex // cid --> appDataHex
+  getAppDataInfo = (appData: AnyAppDataDocVersion | string): Promise<AppDataInfo> =>
+    getAppDataInfo(appData as AnyAppDataDocVersion, this.adapter)
+
+  appDataHexToCid = (appDataHex: string): Promise<string> => appDataHexToCid(appDataHex, this.adapter)
+
+  cidToAppDataHex = cidToAppDataHex
 
   // Fetch from IPFS
-  fetchDocFromAppDataHex = fetchDocFromAppDataHex // appDataHex --> appData
+  fetchDocFromAppDataHex = fetchDocFromAppDataHex
 
+  // Legacy methods
   legacy = {
     // Fetch appData document from IPFS (deprecated)
-    fetchDocFromCid: fetchDocFromCid, // cid --> document
+    fetchDocFromCid: fetchDocFromCid,
 
     // Upload to IPFS (deprecated)
-    uploadMetadataDocToIpfs: uploadMetadataDocToIpfsLegacy, //  appData --> cid + publish IPFS
-    appDataToCid: getAppDataInfoLegacy, // (appData | fullAppData) --> cid
-    appDataHexToCid: appDataHexToCidLegacy, // appDataHex --> cid
-    fetchDocFromAppDataHex: fetchDocFromAppDataHexLegacy, // appDataHex --> appData
+    uploadMetadataDocToIpfs: uploadMetadataDocToIpfsLegacy,
+
+    // (appData | fullAppData) --> cid (deprecated)
+    appDataToCid: (appData: AnyAppDataDocVersion | string): Promise<AppDataInfo | undefined> =>
+      getAppDataInfoLegacy(appData as AnyAppDataDocVersion, this.adapter),
+
+    // appDataHex --> cid (deprecated)
+    appDataHexToCid: (appDataHex: string): Promise<string> => appDataHexToCidLegacy(appDataHex, this.adapter),
+
+    // appDataHex --> appData (deprecated)
+    fetchDocFromAppDataHex: fetchDocFromAppDataHexLegacy,
   }
 }
