@@ -48,6 +48,12 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
     data: Record<string, unknown>,
   ): string
   abstract getChecksumAddress(address: T['Address']): T['Address']
+  abstract encodeAbi(types: unknown[], values: unknown[]): T['Bytes']
+  abstract decodeAbi(types: unknown[], data: T['Bytes']): unknown
+  abstract id(text: string): T['Bytes']
+  abstract toBigIntish(value: string | number | T['BigIntish']): T['BigIntish']
+  abstract newBigintish(value: number | string): T['BigIntish']
+  abstract getStorageAt(address: T['Address'], slot: unknown): Promise<unknown>
 }
 
 /**

@@ -12,6 +12,7 @@ interface EthersV5Types extends AdapterTypes {
   Bytes: BytesLike
   BigIntish: BigNumberish
   ContractInterface: Interface
+  Provider: ethers.providers.Provider
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: Record<string, TypedDataField[]>
 }
@@ -180,5 +181,29 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
 
   getChecksumAddress(address: string): string {
     return ethers.utils.getAddress(address)
+  }
+
+  encodeAbi(types: string[], values: unknown[]): BytesLike {
+    return ethers.utils.defaultAbiCoder.encode(types, values)
+  }
+
+  decodeAbi(types: string[], data: BytesLike) {
+    return ethers.utils.defaultAbiCoder.decode(types, data)
+  }
+
+  id(text: string): BytesLike {
+    return ethers.utils.id(text)
+  }
+
+  toBigIntish(value: BytesLike | string | number): BigNumberish {
+    return ethers.BigNumber.from(value)
+  }
+
+  newBigintish(value: number | string): BigNumberish {
+    return ethers.BigNumber.from(value)
+  }
+
+  async getStorageAt(address: string, slot: BigNumberish): Promise<BytesLike> {
+    return this.provider.getStorageAt(address, slot)
   }
 }

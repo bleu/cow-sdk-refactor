@@ -24,6 +24,10 @@ import {
   encodePacked,
   hashTypedData,
   getAddress,
+  encodeAbiParameters,
+  decodeAbiParameters,
+  stringToHex,
+  hexToBigInt,
 } from 'viem'
 
 import {
@@ -40,6 +44,7 @@ interface ViemTypes extends AdapterTypes {
   Bytes: `0x${string}`
   BigIntish: bigint
   ContractInterface: unknown
+  Provider: PublicClient
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: Record<string, unknown>
 }
@@ -282,5 +287,40 @@ export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
 
   getChecksumAddress(address: Address): Address {
     return getAddress(address)
+  }
+
+  encodeAbi(types: { type: string; name: string }[], values: unknown[]): `0x${string}` {
+    return encodeAbiParameters(types, values)
+  }
+
+  decodeAbi(types: string[], data: `0x${string}`): unknown[] {
+    return decodeAbiParameters(
+      types.map((type, i) => ({ type, name: `arg${i}` })),
+      data,
+    )
+  }
+
+  id(text: string): `0x${string}` {
+    return keccak256(stringToHex(text))
+  }
+
+  toBigIntish(value: `0x${string}` | string | number): bigint {
+    if (typeof value === 'number') return BigInt(value)
+    if (typeof value === 'string') {
+      if (value.startsWith('0x')) return hexToBigInt(value as `0x${string}`)
+      return BigInt(value)
+    }
+    return hexToBigInt(value)
+  }
+
+  newBigintish(value: number | string): bigint {
+    return BigInt(value)
+  }
+
+  async getStorageAt(address: Address, slot: `0x${string}`) {
+    return this.publicClient.getStorageAt({
+      address,
+      slot,
+    })
   }
 }

@@ -21,6 +21,8 @@ import {
   hexlify as ethersHexlify,
   solidityPacked,
   TypedDataEncoder,
+  id,
+  toBigInt,
 } from 'ethers'
 import {
   AbstractProviderAdapter,
@@ -41,6 +43,7 @@ interface EthersV6Types extends AdapterTypes {
   Bytes: BytesLike
   BigIntish: BigNumberish
   ContractInterface: Interface
+  Provider: Provider
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: Record<string, TypedDataField[]>
 }
@@ -242,8 +245,27 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
     return getAddress(address)
   }
 
-  // Add getter for _TypedDataEncoder to match the ethers v5 interface
-  get _TypedDataEncoder() {
-    return TypedDataEncoder
+  encodeAbi(types: string[], values: unknown[]): BytesLike {
+    return AbiCoder.defaultAbiCoder().encode(types, values)
+  }
+
+  decodeAbi(types: string[], data: BytesLike): unknown[] {
+    return AbiCoder.defaultAbiCoder().decode(types, data)
+  }
+
+  id(text: string): BytesLike {
+    return id(text)
+  }
+
+  toBigIntish(value: string | number | BigNumberish): BigNumberish {
+    return toBigInt(value)
+  }
+
+  newBigintish(value: number | string): BigNumberish {
+    return toBigInt(value)
+  }
+
+  async getStorageAt(address: string, slot: BigNumberish): Promise<BytesLike> {
+    return this.provider.getStorage(address, slot)
   }
 }

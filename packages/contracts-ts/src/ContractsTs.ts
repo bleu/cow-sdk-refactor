@@ -13,13 +13,24 @@ import {
   timestamp,
   Timestamp,
 } from './order'
+import { ContractsTs_Proxy } from './proxy'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   SALT: string
   DEPLOYER_CONTRACT: string
+  private proxy: ContractsTs_Proxy<T>
+  public ownerAddress: ContractsTs_Proxy<T>['ownerAddress']
+  public slot: ContractsTs_Proxy<T>['slot']
+  public proxyInterface: ContractsTs_Proxy<T>['proxyInterface']
+  public implementationAddress: ContractsTs_Proxy<T>['implementationAddress']
 
   constructor(private adapter: AbstractProviderAdapter<T>) {
     this.adapter = adapter
+    this.proxy = new ContractsTs_Proxy(adapter)
+    this.ownerAddress = this.proxy.ownerAddress
+    this.slot = this.proxy.slot
+    this.proxyInterface = this.proxy.proxyInterface
+    this.implementationAddress = this.proxy.implementationAddress
     this.SALT = this.adapter.formatBytes32String('Mattresses in Berlin!')
     this.DEPLOYER_CONTRACT = '0x4e59b44847b379578588920ca78fbf26c0b4956c'
   }
