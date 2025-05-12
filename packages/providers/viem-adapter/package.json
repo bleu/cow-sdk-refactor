@@ -17,6 +17,9 @@
     "test:watch": "vitest",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
+  "dependencies": {
+    "@cowprotocol/common": "workspace:*"
+  },
   "peerDependencies": {
     "viem": "^2.28.4"
   },

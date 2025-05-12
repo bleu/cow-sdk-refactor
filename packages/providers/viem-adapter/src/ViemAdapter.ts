@@ -17,8 +17,10 @@ import {
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
+  AppDataUtils,
 } from '@cowprotocol/common'
 import { SignTypedDataParameters } from 'viem/accounts'
+import { ViemAppDataUtils } from './ViemAppDataUtils'
 
 export class ViemAdapter implements AbstractProviderAdapter {
   private publicClient: PublicClient
@@ -180,5 +182,9 @@ export class ViemAdapter implements AbstractProviderAdapter {
       abi,
       client: this.publicClient,
     })
+  }
+
+  getAppDataUtils(): AppDataUtils {
+    return new ViemAppDataUtils()
   }
 }
