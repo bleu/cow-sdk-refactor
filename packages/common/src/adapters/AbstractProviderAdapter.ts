@@ -1,3 +1,5 @@
+import { AppDataUtils } from './types'
+
 /**
  * AbstractProviderAdapter defines the common interface that all provider-specific
  * implementations must follow. This ensures consistent interaction with different
@@ -24,6 +26,9 @@ export interface AbstractProviderAdapter {
 
   // Contract interaction
   getContract(address: string, abi: unknown): unknown
+
+  // app-data utils
+  getAppDataUtils(): AppDataUtils
 }
 
 /**
