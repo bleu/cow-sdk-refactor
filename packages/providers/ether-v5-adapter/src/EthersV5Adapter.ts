@@ -1,6 +1,7 @@
 import { ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
-import { AbstractProviderAdapter, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { AbstractProviderAdapter, AppDataUtils, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { EthersV5AppDataUtils } from './EthersV5AppDataUtils'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
 
@@ -110,5 +111,9 @@ export class EthersV5Adapter implements AbstractProviderAdapter {
 
   getContract(address: string, abi: Abi): unknown {
     return new ethers.Contract(address, abi, this.signer)
+  }
+
+  getAppDataUtils(): AppDataUtils {
+    return new EthersV5AppDataUtils()
   }
 }
