@@ -1,6 +1,4 @@
-import { AbstractProviderAdapter, getGlobalAdapter } from '@cowprotocol/common'
-import { AnyAppDataDocVersion } from '../generatedTypes'
-import { AppDataInfo } from '../types'
+import { AbstractProviderAdapter, setGlobalAdapter } from '@cowprotocol/common'
 import { appDataHexToCid, appDataHexToCidLegacy } from './appDataHexToCid'
 import { cidToAppDataHex } from './cidToAppDataHex'
 import { fetchDocFromAppDataHex, fetchDocFromAppDataHexLegacy } from './fetchDocFromAppData'
@@ -17,21 +15,13 @@ import { validateAppDataDoc } from './validateAppDataDoc'
  * app-data functionality. It supports both direct method calls and object-oriented usage.
  */
 export class AppDataApi {
-  private adapter?: AbstractProviderAdapter
-
   /**
    * Creates a new AppDataApi instance
    *
    * @param adapter Provider adapter implementation
    */
-  constructor(adapter?: AbstractProviderAdapter) {
-    if (adapter) {
-      // It's an adapter
-      this.adapter = adapter
-    } else {
-      // Use global adapter
-      this.adapter = getGlobalAdapter()
-    }
+  constructor(adapter: AbstractProviderAdapter) {
+    setGlobalAdapter(adapter)
   }
 
   // Schema & Doc generation/validation
@@ -40,10 +30,9 @@ export class AppDataApi {
   validateAppDataDoc = validateAppDataDoc
 
   // appData / CID conversion
-  getAppDataInfo = (appData: AnyAppDataDocVersion | string): Promise<AppDataInfo> =>
-    getAppDataInfo(appData as AnyAppDataDocVersion, this.adapter)
+  getAppDataInfo = getAppDataInfo
 
-  appDataHexToCid = (appDataHex: string): Promise<string> => appDataHexToCid(appDataHex, this.adapter)
+  appDataHexToCid = appDataHexToCid
 
   cidToAppDataHex = cidToAppDataHex
 
@@ -59,11 +48,10 @@ export class AppDataApi {
     uploadMetadataDocToIpfs: uploadMetadataDocToIpfsLegacy,
 
     // (appData | fullAppData) --> cid (deprecated)
-    appDataToCid: (appData: AnyAppDataDocVersion | string): Promise<AppDataInfo | undefined> =>
-      getAppDataInfoLegacy(appData as AnyAppDataDocVersion, this.adapter),
+    appDataToCid: getAppDataInfoLegacy,
 
     // appDataHex --> cid (deprecated)
-    appDataHexToCid: (appDataHex: string): Promise<string> => appDataHexToCidLegacy(appDataHex, this.adapter),
+    appDataHexToCid: appDataHexToCidLegacy,
 
     // appDataHex --> appData (deprecated)
     fetchDocFromAppDataHex: fetchDocFromAppDataHexLegacy,

@@ -1,4 +1,4 @@
-import { AbstractProviderAdapter, getGlobalAdapter } from '@cowprotocol/common'
+import { getGlobalAdapter } from '@cowprotocol/common'
 import { MetaDataError } from '../consts'
 import { AnyAppDataDocVersion } from '../generatedTypes'
 import { AppDataInfo } from '../types'
@@ -14,12 +14,8 @@ import { validateAppDataDoc } from './validateAppDataDoc'
  * of IPFS upload/pinning
  *
  * @param appData JSON document which will be stringified in a deterministic way to calculate the IPFS hash
- * @param adapter
  */
-export async function getAppDataInfo(
-  appData: AnyAppDataDocVersion,
-  adapter?: AbstractProviderAdapter
-): Promise<AppDataInfo>
+export async function getAppDataInfo(appData: AnyAppDataDocVersion): Promise<AppDataInfo>
 
 /**
  * Calculates appDataHex without publishing file to IPFS
@@ -30,26 +26,17 @@ export async function getAppDataInfo(
  * of IPFS upload/pinning
  *
  * @param fullAppData JSON string with the full appData document
- * @param adapter
  */
-export async function getAppDataInfo(
-  fullAppData: string,
-  adapter?: AbstractProviderAdapter
-): Promise<AppDataInfo | undefined>
+export async function getAppDataInfo(fullAppData: string): Promise<AppDataInfo | undefined>
 
 /**
  * @deprecated AppData is not longer stored on IPFS nor it's derived from IPFS content hashes
  *
  * @param appDataAux App data document or JSON string
- * @param adapter
  * @returns App data information including CID and hex
  */
-export async function getAppDataInfo(
-  appDataAux: AnyAppDataDocVersion | string,
-  adapter?: AbstractProviderAdapter
-): Promise<AppDataInfo> {
-  const internalAdapter = adapter || getGlobalAdapter()
-  return _appDataToCidAux(appDataAux, (fullAppData) => _appDataToCid(fullAppData, internalAdapter), internalAdapter)
+export async function getAppDataInfo(appDataAux: AnyAppDataDocVersion | string): Promise<AppDataInfo> {
+  return _appDataToCidAux(appDataAux, (fullAppData) => _appDataToCid(fullAppData))
 }
 
 /**
@@ -58,12 +45,8 @@ export async function getAppDataInfo(
  * @deprecated Please use getAppDataInfo instead
  *
  * @param appData JSON document which will be stringified in a deterministic way to calculate the IPFS hash
- * @param adapter
  */
-export async function getAppDataInfoLegacy(
-  appData: AnyAppDataDocVersion,
-  adapter?: AbstractProviderAdapter
-): Promise<AppDataInfo | undefined>
+export async function getAppDataInfoLegacy(appData: AnyAppDataDocVersion): Promise<AppDataInfo | undefined>
 
 /**
  * Calculates appDataHex without publishing file to IPFS
@@ -74,12 +57,8 @@ export async function getAppDataInfoLegacy(
  * @deprecated Please use getAppDataInfo instead
  *
  * @param fullAppData JSON string with the full appData document
- * @param adapter
  */
-export async function getAppDataInfoLegacy(
-  fullAppData: string,
-  adapter?: AbstractProviderAdapter
-): Promise<AppDataInfo | undefined>
+export async function getAppDataInfoLegacy(fullAppData: string): Promise<AppDataInfo | undefined>
 
 /**
  * Gets the appDataInfo using the legacy method (IPFS CID has different hashing algorithm, this hashing algorithm is not used anymore by CoW Protocol)
@@ -87,16 +66,13 @@ export async function getAppDataInfoLegacy(
  * @deprecated Please use getAppDataInfo instead
  *
  * @param appDataAux App data document or JSON string
- * @param adapter
  */
 export async function getAppDataInfoLegacy(
   appDataAux: AnyAppDataDocVersion | string,
-  adapter?: AbstractProviderAdapter
 ): Promise<AppDataInfo | undefined> {
   // For the legacy-mode we use plain JSON.stringify to maintain backwards compatibility, however this is not a good idea to do since JSON.stringify. Better specify the doc as a fullAppData string or use stringifyDeterministic
   const fullAppData = JSON.stringify(appDataAux)
-  const internalAdapter = adapter || getGlobalAdapter()
-  return _appDataToCidAux(fullAppData, (data) => _appDataToCidLegacy(data), internalAdapter)
+  return _appDataToCidAux(fullAppData, (data) => _appDataToCidLegacy(data))
 }
 
 /**
@@ -104,12 +80,10 @@ export async function getAppDataInfoLegacy(
  *
  * @param appDataAux App data document or JSON string
  * @param deriveCid Function to derive CID from full app data
- * @param adapter
  */
 export async function _appDataToCidAux(
   appDataAux: AnyAppDataDocVersion | string,
   deriveCid: (fullAppData: string) => Promise<string>,
-  adapter: AbstractProviderAdapter
 ): Promise<AppDataInfo> {
   const [appDataDoc, fullAppData] =
     typeof appDataAux === 'string'
@@ -142,13 +116,12 @@ export async function _appDataToCidAux(
  * Derive the IPFS CID v0 from the full appData JSON content
  *
  * @param fullAppDataJson string with the full AppData in JSON format. It is a string to make the hashing deterministic (do not rely on stringification of objects)
- * @param adapter
  * @returns the IPFS CID v0 of the content
  */
-async function _appDataToCid(fullAppDataJson: string, adapter: AbstractProviderAdapter): Promise<string> {
-  const appDataUtils = adapter.getAppDataUtils()
+async function _appDataToCid(fullAppDataJson: string): Promise<string> {
+  const appDataUtils = getGlobalAdapter().getAppDataUtils()
   const appDataHex = appDataUtils.keccak256(appDataUtils.toUtf8Bytes(fullAppDataJson))
-  return appDataHexToCid(appDataHex, adapter)
+  return appDataHexToCid(appDataHex)
 }
 
 /**
