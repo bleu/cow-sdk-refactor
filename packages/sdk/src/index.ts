@@ -4,9 +4,9 @@ export * from '@cowprotocol/cow-app-data'
 
 export interface CowSdkOptions {
   adapter: AbstractProviderAdapter
-  chainId: number
-  appDataApiBaseUrl?: string
-  orderBookApiBaseUrl?: string
+  // chainId: number
+  // appDataApiBaseUrl?: string
+  // orderBookApiBaseUrl?: string
 }
 
 /**
@@ -25,7 +25,7 @@ export class CowSdk {
    * @param options Configuration options for the SDK
    */
   constructor(options: CowSdkOptions) {
-    const { adapter, chainId, appDataApiBaseUrl, orderBookApiBaseUrl } = options
+    const { adapter } = options
 
     // Define the global adapter for use in all modules
     setGlobalAdapter(adapter)
