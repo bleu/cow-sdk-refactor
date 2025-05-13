@@ -1,10 +1,11 @@
 import { AbstractProviderAdapter, AdapterTypes } from '@cowprotocol/common'
 import { ContractsTs_Interaction } from './interaction'
 import { ContractsTs_Proxy } from './proxy'
-import { ContractsTs_Sign } from './sign'
-import { ContractsTs_Order } from './order'
+import { ContractsTs_Sign, EcdsaSigningScheme, Signature } from './sign'
+import { ContractsTs_Order, Order, ORDER_TYPE_FIELDS, ORDER_UID_LENGTH } from './order'
 import { ContractsTs_Deploy } from './deploy'
-import { ContractsTs_Settlement } from './settlement'
+import { ContractsTs_Settlement, SettlementEncoder } from './settlement'
+import { ContractsTs_Swap, SwapEncoder, Swap, SwapExecution } from './swap'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   private proxy: ContractsTs_Proxy<T>
@@ -30,6 +31,9 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   public computeOrderUid: ContractsTs_Order<T>['computeOrderUid']
   public packOrderUidParams: ContractsTs_Order<T>['packOrderUidParams']
   public extractOrderUidParams: ContractsTs_Order<T>['extractOrderUidParams']
+  // Make ORDER_TYPE_FIELDS and ORDER_UID_LENGTH available
+  public ORDER_TYPE_FIELDS = ORDER_TYPE_FIELDS
+  public ORDER_UID_LENGTH = ORDER_UID_LENGTH
 
   private deploy: ContractsTs_Deploy<T>
   public deterministicDeploymentAddress: ContractsTs_Deploy<T>['deterministicDeploymentAddress']
@@ -50,6 +54,9 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   public encodeTrade: ContractsTs_Settlement<T>['encodeTrade']
   public decodeOrder: ContractsTs_Settlement<T>['decodeOrder']
 
+  private swap: ContractsTs_Swap<T>
+  public encodeSwapStep: ContractsTs_Swap<T>['encodeSwapStep']
+
   constructor(private adapter: AbstractProviderAdapter<T>) {
     this.adapter = adapter
 
@@ -58,13 +65,6 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
     this.slot = this.proxy.slot
     this.proxyInterface = this.proxy.proxyInterface
     this.implementationAddress = this.proxy.implementationAddress
-
-    this.sign = new ContractsTs_Sign(adapter, this)
-    this.EIP1271_MAGICVALUE = this.sign.EIP1271_MAGICVALUE
-    this.EcdsaSigningScheme = this.sign.EcdsaSigningScheme
-    this.decodeEip1271SignatureData = this.sign.decodeEip1271SignatureData
-    this.encodeEip1271SignatureData = this.sign.encodeEip1271SignatureData
-    this.signOrder = this.sign.signOrder
 
     this.order = new ContractsTs_Order(adapter)
     this.timestamp = this.order.timestamp
@@ -95,6 +95,16 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
     this.decodeSignatureOwner = this.settlement.decodeSignatureOwner.bind(this.settlement)
     this.encodeTrade = this.settlement.encodeTrade.bind(this.settlement)
     this.decodeOrder = this.settlement.decodeOrder.bind(this.settlement)
+
+    this.swap = new ContractsTs_Swap(adapter, this)
+    this.encodeSwapStep = this.swap.encodeSwapStep.bind(this.swap)
+
+    this.sign = new ContractsTs_Sign(adapter, this)
+    this.EIP1271_MAGICVALUE = this.sign.EIP1271_MAGICVALUE
+    this.EcdsaSigningScheme = this.sign.EcdsaSigningScheme
+    this.decodeEip1271SignatureData = this.sign.decodeEip1271SignatureData
+    this.encodeEip1271SignatureData = this.sign.encodeEip1271SignatureData
+    this.signOrder = this.sign.signOrder
   }
 
   /**
@@ -112,5 +122,98 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
       verifyingContract,
     }
   }
-  // ... other methods from contracts-ts that need adapter
+
+  /**
+   * Creates a new settlement encoder instance.
+   *
+   * @param domain The EIP-712 domain to use for signing orders.
+   * @returns A new settlement encoder instance.
+   */
+  public createSettlementEncoder(domain: T['TypedDataDomain']) {
+    return new SettlementEncoder(domain, this.adapter, this, this.settlement)
+  }
+
+  /**
+   * Creates a new swap encoder instance.
+   *
+   * @param domain The EIP-712 domain to use for signing orders.
+   * @returns A new swap encoder instance.
+   */
+  public createSwapEncoder(domain: T['TypedDataDomain']) {
+    return new SwapEncoder(domain, this.adapter, this)
+  }
+
+  /**
+   * Static method to create encoded settlement setup.
+   *
+   * @param adapter The provider adapter to use.
+   * @param interactions The list of interactions to encode.
+   * @returns The encoded settlement.
+   */
+  public static encodedSetup<T extends AdapterTypes>(
+    adapter: AbstractProviderAdapter<T>,
+    ...interactions: Array<{
+      target: string
+      value?: T['BigIntish']
+      callData?: T['Bytes']
+    }>
+  ) {
+    const contracts = new ContractsTs<T>(adapter)
+    return SettlementEncoder.encodedSetup(adapter, contracts, contracts.settlement, ...interactions)
+  }
+
+  /**
+   * Static method to encode a swap.
+   *
+   * @param adapter The provider adapter to use.
+   * @param swaps The swaps to encode.
+   * @param order The order to trade.
+   * @param signature The order signature.
+   * @param swapExecution Optional swap execution parameters.
+   * @returns The encoded swap.
+   */
+  public static encodeSwap<T extends AdapterTypes>(
+    adapter: AbstractProviderAdapter<T>,
+    swaps: Swap<T>[],
+    order: Order<T>,
+    signature: Signature<T>,
+    swapExecution?: Partial<SwapExecution<T>>,
+  ) {
+    const contracts = new ContractsTs<T>(adapter)
+    return ContractsTs_Swap.encodeSwap(adapter, contracts, swaps, order, signature, swapExecution)
+  }
+
+  /**
+   * Static method to encode a swap with signing.
+   *
+   * @param adapter The provider adapter to use.
+   * @param domain The EIP-712 domain to use for signing.
+   * @param swaps The swaps to encode.
+   * @param order The order to trade.
+   * @param owner The owner to sign with.
+   * @param scheme The signing scheme to use.
+   * @param swapExecution Optional swap execution parameters.
+   * @returns A promise that resolves to the encoded swap.
+   */
+  public static encodeSwapWithSigning<T extends AdapterTypes>(
+    adapter: AbstractProviderAdapter<T>,
+    domain: T['TypedDataDomain'],
+    swaps: Swap<T>[],
+    order: Order<T>,
+    owner: T['Signer'],
+    scheme: EcdsaSigningScheme,
+    swapExecution?: Partial<SwapExecution<T>>,
+  ) {
+    const contracts = new ContractsTs<T>(adapter)
+    return ContractsTs_Swap.encodeSwapWithSigning(
+      adapter,
+      contracts,
+      domain,
+      swaps,
+      order,
+      owner,
+      scheme,
+      swapExecution,
+    )
+  }
 }
