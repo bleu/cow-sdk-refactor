@@ -80,7 +80,7 @@ async function _toCidBytes(params: ToCidParams): Promise<Uint8Array> {
 
   // Concat prefix and multihash
   const cidPrefix = Uint8Array.from([params.version, params.multicodec, params.hashingAlgorithm, params.hashingLength])
-  var cidBytes = new Uint8Array(cidPrefix.length + hashBytes.length)
+  const cidBytes = new Uint8Array(cidPrefix.length + hashBytes.length)
   cidBytes.set(cidPrefix)
   cidBytes.set(hashBytes, cidPrefix.length)
 

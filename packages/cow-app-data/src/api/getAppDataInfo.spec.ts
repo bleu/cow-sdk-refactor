@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import fetchMock from 'jest-fetch-mock'
 import {
   APP_DATA_DOC,

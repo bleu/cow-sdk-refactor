@@ -39,11 +39,11 @@ export function setGlobalAdapter(adapter: AbstractProviderAdapter): void {
 }
 
 // Decorator for functions that use the global adapter
-export function withGlobalAdapter(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-  const originalMethod = descriptor.value
-  descriptor.value = function (...args: any[]) {
-    const adapter = getGlobalAdapter()
-    return originalMethod.apply(this, [...args, adapter])
-  }
-  return descriptor
-}
+// export function withGlobalAdapter(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+//   const originalMethod = descriptor.value
+//   descriptor.value = function (...args: any[]) {
+//     const adapter = getGlobalAdapter()
+//     return originalMethod.apply(this, [...args, adapter])
+//   }
+//   return descriptor
+// }

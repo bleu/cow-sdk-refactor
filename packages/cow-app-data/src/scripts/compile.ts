@@ -22,7 +22,7 @@ async function compile(): Promise<void> {
   // Check if the schemas directory exists
   try {
     await fs.promises.access(SCHEMAS_SRC_PATH)
-  } catch (e) {
+  } catch {
     console.error(`Schemas directory ${SCHEMAS_SRC_PATH} does not exist or is not accessible!`)
     console.error('Make sure you have copied the schema files from the original app-data repository')
     return
@@ -69,7 +69,7 @@ async function compile(): Promise<void> {
 
       // Compiles schema files de-referencing `$ref`s
       console.info(`Compiling bundled schema file for ${schemaPath}`)
-      const parser = new ($RefParser as any)()
+      const parser = new ($RefParser as unknown as { new (): $RefParser })()
       const newSchemaFile = await parser.bundle(schemaPath)
       await fs.promises.writeFile(path.join(SCHEMAS_DEST_PATH, `${version}.json`), JSON.stringify(newSchemaFile))
 
@@ -84,8 +84,8 @@ async function compile(): Promise<void> {
         const exportName = version.replace(/\./g, '_')
         const versionImportPath = `./${version}`
         await typesIndexFile.write(`import * as ${exportName} from '${versionImportPath}'\n`)
-      } catch (e) {
-        console.error(`Error compiling typings for ${schemaPath}:`, e)
+      } catch (error) {
+        console.error(`Error compiling typings for ${schemaPath}:`, error)
       }
     }
     console.log(`Processed ${versions.length} version schemas`)
@@ -148,7 +148,7 @@ async function compile(): Promise<void> {
 
           export {${versions.map((version) => `\n  ${versionNameToExport(version)}`)}
           }
-        ` 
+        `
         // Write exports to types/index.ts
         await typesIndexFile.write(additionalTypesExport)
 
@@ -208,7 +208,7 @@ async function getLatestMetadataDocVersion(
     | 'signer'
     | 'widget'
     | 'partnerFee'
-    | 'replacedOrder'
+    | 'replacedOrder',
 ): Promise<string> {
   const metadataPath = path.join(SCHEMAS_SRC_PATH, metadataDocName)
   try {

@@ -1,14 +1,9 @@
-import { DEFAULT_IPFS_READ_URI } from '../consts'
-import {
-  APP_DATA_DOC_CUSTOM,
-  APP_DATA_HEX_LEGACY,
-  CID_LEGACY,
-  HTTP_STATUS_INTERNAL_ERROR,
-  HTTP_STATUS_OK,
-} from '../mocks'
+import { APP_DATA_DOC_CUSTOM, APP_DATA_HEX_LEGACY, CID_LEGACY } from '../mocks'
 import { fetchDocFromAppDataHex, fetchDocFromAppDataHexLegacy } from './fetchDocFromAppData'
 import { AbstractProviderAdapter } from '@cowprotocol/common'
 import fetchMock from 'jest-fetch-mock'
+import { appDataHexToCidLegacy } from './appDataHexToCid'
+import { fetchDocFromCid } from './fetchDocFromCid'
 
 fetchMock.enableMocks()
 
@@ -41,7 +36,7 @@ jest.mock('./appDataHexToCid', () => ({
 }))
 
 jest.mock('./fetchDocFromCid', () => ({
-  fetchDocFromCid: jest.fn(async (cid, ipfsUri) => {
+  fetchDocFromCid: jest.fn(async (cid) => {
     if (cid === CID_LEGACY) {
       return APP_DATA_DOC_CUSTOM
     }
@@ -64,9 +59,6 @@ describe('fetchDocFromAppData', () => {
     const appDataDoc = await fetchDocFromAppDataHexLegacy(APP_DATA_HEX_LEGACY)
 
     // then
-    const { appDataHexToCidLegacy } = require('./appDataHexToCid')
-    const { fetchDocFromCid } = require('./fetchDocFromCid')
-
     expect(appDataHexToCidLegacy).toHaveBeenCalledWith(APP_DATA_HEX_LEGACY)
     expect(fetchDocFromCid).toHaveBeenCalledWith(CID_LEGACY, undefined)
     expect(appDataDoc).toEqual(APP_DATA_DOC_CUSTOM)
