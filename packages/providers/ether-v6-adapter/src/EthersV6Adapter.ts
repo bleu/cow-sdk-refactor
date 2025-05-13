@@ -26,6 +26,8 @@ import {
   dataSlice,
   Signature,
   SignatureLike,
+  verifyTypedData,
+  verifyMessage,
 } from 'ethers'
 import {
   AbstractProviderAdapter,
@@ -292,5 +294,31 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
       s: sig.s,
       v: sig.v,
     }
+  }
+
+  verifyMessage(message: string | Uint8Array, signature: SignatureLike): string {
+    return verifyMessage(message, signature)
+  }
+
+  verifyTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, Array<{ name: string; type: string }>>,
+    value: Record<string, unknown>,
+    signature: SignatureLike,
+  ): string {
+    return verifyTypedData(domain, types, value, signature)
+  }
+
+  encodeFunction(
+    abi: Array<{ name: string; inputs: Array<{ type: string }> }>,
+    functionName: string,
+    args: unknown[],
+  ): BytesLike {
+    const iface = new Interface(abi)
+    return iface.encodeFunctionData(functionName, args)
+  }
+
+  toNumber(value: BigNumberish): number {
+    return Number(value.toString())
   }
 }

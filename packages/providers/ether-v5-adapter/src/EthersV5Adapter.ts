@@ -224,4 +224,30 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
       v: split.v,
     }
   }
+
+  verifyMessage(message: string | Uint8Array, signature: BytesLike): string {
+    return ethers.utils.verifyMessage(message, signature)
+  }
+
+  verifyTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, Array<{ name: string; type: string }>>,
+    value: Record<string, unknown>,
+    signature: BytesLike,
+  ): string {
+    return ethers.utils.verifyTypedData(domain, types, value, signature)
+  }
+
+  encodeFunction(
+    abi: Array<{ name: string; inputs: Array<{ type: string }> }>,
+    functionName: string,
+    args: unknown[],
+  ): BytesLike {
+    const iface = new ethers.utils.Interface(abi)
+    return iface.encodeFunctionData(functionName, args)
+  }
+
+  toNumber(value: BigNumberish): number {
+    return ethers.BigNumber.from(value).toNumber()
+  }
 }

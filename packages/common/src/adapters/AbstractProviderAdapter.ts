@@ -20,7 +20,18 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
 
   // Signing operations
   abstract signMessage(message: string | Uint8Array): Promise<string>
-  abstract signTypedData(domain: unknown, types: unknown, value: unknown): Promise<string>
+  abstract signTypedData(
+    domain: T['TypedDataDomain'],
+    types: T['TypedDataTypes'],
+    value: Record<string, unknown>,
+  ): Promise<string>
+  abstract verifyMessage(message: unknown, signature: unknown): string | Promise<string>
+  abstract verifyTypedData(
+    domain: T['TypedDataDomain'],
+    types: Record<string, Array<{ name: string; type: string }>>,
+    value: Record<string, unknown>,
+    signature: unknown,
+  ): string | Promise<string>
 
   // Data retrieval
   abstract call(txParams: TransactionParams): Promise<string>
@@ -29,7 +40,12 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
   abstract getTransactionCount(address: string): Promise<number>
 
   // Contract interaction
-  abstract getContract(address: string, abi: unknown): unknown
+  abstract getContract(address: string, abi: T['Abi']): unknown
+  abstract encodeFunction(
+    abi: Array<{ name: string; inputs: Array<{ type: string }> }>,
+    functionName: string,
+    args: unknown[],
+  ): T['Bytes']
 
   // Utils
   abstract getCreate2Address(from: string, salt: T['Bytes'], initCodeHash: T['Bytes']): string
@@ -40,8 +56,7 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
   abstract hexZeroPad(value: T['Bytes'], length: number): string
   abstract arrayify(hexString: T['Bytes']): Uint8Array
   abstract hexlify(value: T['Bytes']): string
-  // eslint-disable-next-line
-  abstract solidityPack(types: string[], values: any[]): string
+  abstract solidityPack(types: string[], values: unknown[]): string
   abstract hashTypedData(
     domain: T['TypedDataDomain'],
     types: T['TypedDataTypes'],

@@ -29,6 +29,10 @@ import {
   stringToHex,
   hexToBigInt,
   slice,
+  parseAbi,
+  encodeFunctionData,
+  recoverMessageAddress,
+  recoverTypedDataAddress,
 } from 'viem'
 
 import {
@@ -358,5 +362,56 @@ export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
     const v = vInt < 27 ? vInt + 27 : vInt
 
     return { r, s, v }
+  }
+  async verifyMessage(message: string | Uint8Array, signature: `0x${string}`): Promise<string> {
+    const messageString = typeof message === 'string' ? message : new TextDecoder().decode(message)
+
+    return recoverMessageAddress({
+      message: messageString,
+      signature,
+    })
+  }
+
+  async verifyTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, Array<{ name: string; type: string }>>,
+    value: Record<string, unknown>,
+    signature: `0x${string}`,
+  ) {
+    const primaryType = Object.keys(types)[0]
+    if (!primaryType) {
+      throw new Error('No primary type found in types')
+    }
+
+    return recoverTypedDataAddress({
+      domain,
+      types,
+      primaryType,
+      message: value,
+      signature,
+    })
+  }
+
+  encodeFunction(
+    abi: Array<{ name: string; inputs: Array<{ type: string }> }>,
+    functionName: string,
+    args: unknown[],
+  ): `0x${string}` {
+    // Convert simple ABI to viem parseAbi format
+    const abiString = abi.map((fn) => {
+      const inputsStr = fn.inputs.map((input) => input.type).join(',')
+      return `function ${fn.name}(${inputsStr})`
+    })
+
+    const parsedAbi = parseAbi(abiString)
+    return encodeFunctionData({
+      abi: parsedAbi,
+      functionName,
+      args,
+    })
+  }
+
+  toNumber(value: bigint): number {
+    return Number(value)
   }
 }

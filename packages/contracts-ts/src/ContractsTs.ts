@@ -4,6 +4,7 @@ import { ContractsTs_Proxy } from './proxy'
 import { ContractsTs_Sign } from './sign'
 import { ContractsTs_Order } from './order'
 import { ContractsTs_Deploy } from './deploy'
+import { ContractsTs_Settlement } from './settlement'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   private proxy: ContractsTs_Proxy<T>
@@ -36,6 +37,18 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   private interaction: ContractsTs_Interaction<T>
   public normalizeInteraction: ContractsTs_Interaction<T>['normalizeInteraction']
   public normalizeInteractions: ContractsTs_Interaction<T>['normalizeInteractions']
+
+  private settlement: ContractsTs_Settlement<T>
+  public encodeSigningScheme: ContractsTs_Settlement<T>['encodeSigningScheme']
+  public decodeSigningScheme: ContractsTs_Settlement<T>['decodeSigningScheme']
+  public encodeOrderFlags: ContractsTs_Settlement<T>['encodeOrderFlags']
+  public decodeOrderFlags: ContractsTs_Settlement<T>['decodeOrderFlags']
+  public encodeTradeFlags: ContractsTs_Settlement<T>['encodeTradeFlags']
+  public decodeTradeFlags: ContractsTs_Settlement<T>['decodeTradeFlags']
+  public encodeSignatureData: ContractsTs_Settlement<T>['encodeSignatureData']
+  public decodeSignatureOwner: ContractsTs_Settlement<T>['decodeSignatureOwner']
+  public encodeTrade: ContractsTs_Settlement<T>['encodeTrade']
+  public decodeOrder: ContractsTs_Settlement<T>['decodeOrder']
 
   constructor(private adapter: AbstractProviderAdapter<T>) {
     this.adapter = adapter
@@ -70,6 +83,18 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
     this.interaction = new ContractsTs_Interaction(adapter)
     this.normalizeInteraction = this.interaction.normalizeInteraction
     this.normalizeInteractions = this.interaction.normalizeInteractions
+
+    this.settlement = new ContractsTs_Settlement(adapter, this)
+    this.encodeSigningScheme = this.settlement.encodeSigningScheme.bind(this.settlement)
+    this.decodeSigningScheme = this.settlement.decodeSigningScheme.bind(this.settlement)
+    this.encodeOrderFlags = this.settlement.encodeOrderFlags.bind(this.settlement)
+    this.decodeOrderFlags = this.settlement.decodeOrderFlags.bind(this.settlement)
+    this.encodeTradeFlags = this.settlement.encodeTradeFlags.bind(this.settlement)
+    this.decodeTradeFlags = this.settlement.decodeTradeFlags.bind(this.settlement)
+    this.encodeSignatureData = this.settlement.encodeSignatureData.bind(this.settlement)
+    this.decodeSignatureOwner = this.settlement.decodeSignatureOwner.bind(this.settlement)
+    this.encodeTrade = this.settlement.encodeTrade.bind(this.settlement)
+    this.decodeOrder = this.settlement.decodeOrder.bind(this.settlement)
   }
 
   /**
