@@ -72,6 +72,8 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
   abstract hexDataSlice(data: T['Bytes'], offset: number, endOffset?: number): T['Bytes']
   abstract joinSignature(signature: { r: string; s: string; v: number }): string
   abstract splitSignature(signature: T['Bytes']): { r: string; s: string; v: number }
+  abstract solidityKeccak256(types: unknown[], values: unknown[]): unknown
+  abstract createInterface(abi: unknown): T['ContractInterface']
 }
 
 /**

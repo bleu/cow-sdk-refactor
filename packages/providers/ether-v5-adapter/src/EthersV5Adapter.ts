@@ -250,4 +250,8 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
   toNumber(value: BigNumberish): number {
     return ethers.BigNumber.from(value).toNumber()
   }
+
+  solidityKeccak256(types: string[], values: unknown[]): unknown {
+    return ethers.utils.solidityKeccak256(types, values)
+  }
 }

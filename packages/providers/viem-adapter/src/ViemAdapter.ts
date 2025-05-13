@@ -414,4 +414,15 @@ export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
   toNumber(value: bigint): number {
     return Number(value)
   }
+
+  solidityKeccak256(types: unknown[], values: unknown[]) {
+    const encoded = encodePacked(types, values)
+
+    // Hash the encoded data
+    return keccak256(encoded)
+  }
+
+  createInterface(abi: string[]) {
+    return parseAbi(abi)
+  }
 }

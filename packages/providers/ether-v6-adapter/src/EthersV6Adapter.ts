@@ -28,6 +28,7 @@ import {
   SignatureLike,
   verifyTypedData,
   verifyMessage,
+  InterfaceAbi,
 } from 'ethers'
 import {
   AbstractProviderAdapter,
@@ -38,7 +39,7 @@ import {
 } from '@cowprotocol/common'
 import { TypedDataDomain } from 'ethers'
 import { DeploymentArguments } from '@cowprotocol/contracts-ts'
-import { getAddress } from 'ethers/lib/utils'
+import { getAddress, solidityKeccak256 } from 'ethers/lib/utils'
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 
@@ -320,5 +321,12 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
 
   toNumber(value: BigNumberish): number {
     return Number(value.toString())
+  }
+  solidityKeccak256(types: string[], values: unknown[]): unknown {
+    return solidityKeccak256(types, values)
+  }
+
+  createInterface(abi: InterfaceAbi): Interface {
+    return new Interface(abi)
   }
 }
