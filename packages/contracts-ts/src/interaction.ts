@@ -1,3 +1,5 @@
+import { AbstractProviderAdapter, AdapterTypes } from '@cowprotocol/common'
+
 /**
  * Gnosis Protocol v2 interaction data.
  */
@@ -46,4 +48,33 @@ export function normalizeInteractions<BigIntish, Bytes>(
   interactions: InteractionLike<BigIntish, Bytes>[],
 ): Interaction[] {
   return interactions.map(normalizeInteraction)
+}
+
+export class ContractsTs_Interaction<T extends AdapterTypes = AdapterTypes> {
+  constructor(private adapter: AbstractProviderAdapter<T>) {
+    this.adapter = adapter
+  }
+
+  /**
+   * Normalizes interaction data so that it is ready to be be ABI encoded.
+   *
+   * @param interaction The interaction to normalize.
+   * @return The normalized interaction.
+   */
+  public normalizeInteraction(
+    interaction: InteractionLike<T['BigIntish'], T['Bytes']>,
+  ): Interaction<T['BigIntish'], T['Bytes']> {
+    return normalizeInteraction<T['BigIntish'], T['Bytes']>(interaction)
+  }
+
+  /**
+   * Normalizes data for many interactions so that they can be ABI encoded. This
+   * calls [`normalizeInteraction`] for each interaction.
+   *
+   * @param interactions The interactions to normalize.
+   * @return The normalized interactions.
+   */
+  public normalizeInteractions(interactions: InteractionLike<T['BigIntish'], T['Bytes']>[]): Interaction[] {
+    return normalizeInteractions<T['BigIntish'], T['Bytes']>(interactions)
+  }
 }
