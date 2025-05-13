@@ -13,6 +13,7 @@ interface EthersV5Types extends AdapterTypes {
   BigIntish: BigNumberish
   ContractInterface: Interface
   Provider: ethers.providers.Provider
+  Signer: ethers.Signer
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: Record<string, TypedDataField[]>
 }
@@ -205,5 +206,22 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
 
   async getStorageAt(address: string, slot: BigNumberish): Promise<BytesLike> {
     return this.provider.getStorageAt(address, slot)
+  }
+
+  hexDataSlice(data: BytesLike, offset: number, endOffset?: number): BytesLike {
+    return ethers.utils.hexDataSlice(data, offset, endOffset)
+  }
+
+  joinSignature(signature: { r: string; s: string; v: number }): string {
+    return ethers.utils.joinSignature(signature)
+  }
+
+  splitSignature(signature: BytesLike): { r: string; s: string; v: number } {
+    const split = ethers.utils.splitSignature(signature)
+    return {
+      r: split.r,
+      s: split.s,
+      v: split.v,
+    }
   }
 }

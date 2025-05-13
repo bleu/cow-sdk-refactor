@@ -23,6 +23,9 @@ import {
   TypedDataEncoder,
   id,
   toBigInt,
+  dataSlice,
+  Signature,
+  SignatureLike,
 } from 'ethers'
 import {
   AbstractProviderAdapter,
@@ -44,6 +47,7 @@ interface EthersV6Types extends AdapterTypes {
   BigIntish: BigNumberish
   ContractInterface: Interface
   Provider: Provider
+  Signer: Signer
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: Record<string, TypedDataField[]>
 }
@@ -267,5 +271,26 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
 
   async getStorageAt(address: string, slot: BigNumberish): Promise<BytesLike> {
     return this.provider.getStorage(address, slot)
+  }
+
+  hexDataSlice(data: BytesLike, offset: number, endOffset?: number): BytesLike {
+    return dataSlice(data, offset, endOffset)
+  }
+
+  joinSignature(signature: { r: string; s: string; v: number }): string {
+    return Signature.from({
+      r: signature.r,
+      s: signature.s,
+      v: signature.v,
+    }).serialized
+  }
+
+  splitSignature(signature: BytesLike): { r: string; s: string; v: number } {
+    const sig = Signature.from(signature as SignatureLike)
+    return {
+      r: sig.r,
+      s: sig.s,
+      v: sig.v,
+    }
   }
 }

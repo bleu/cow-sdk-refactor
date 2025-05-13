@@ -38,7 +38,7 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
   abstract keccak256(data: T['Bytes']): string
   abstract encodeDeploy(encodeDeployArgs: unknown, abi: T['Abi']): string
   abstract hexZeroPad(value: T['Bytes'], length: number): string
-  abstract arrayify(hexString: string): Uint8Array
+  abstract arrayify(hexString: T['Bytes']): Uint8Array
   abstract hexlify(value: T['Bytes']): string
   // eslint-disable-next-line
   abstract solidityPack(types: string[], values: any[]): string
@@ -54,6 +54,9 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
   abstract toBigIntish(value: string | number | T['BigIntish']): T['BigIntish']
   abstract newBigintish(value: number | string): T['BigIntish']
   abstract getStorageAt(address: T['Address'], slot: unknown): Promise<unknown>
+  abstract hexDataSlice(data: T['Bytes'], offset: number, endOffset?: number): T['Bytes']
+  abstract joinSignature(signature: { r: string; s: string; v: number }): string
+  abstract splitSignature(signature: T['Bytes']): { r: string; s: string; v: number }
 }
 
 /**

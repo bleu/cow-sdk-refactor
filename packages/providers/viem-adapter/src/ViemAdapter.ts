@@ -28,6 +28,7 @@ import {
   decodeAbiParameters,
   stringToHex,
   hexToBigInt,
+  slice,
 } from 'viem'
 
 import {
@@ -45,6 +46,7 @@ interface ViemTypes extends AdapterTypes {
   BigIntish: bigint
   ContractInterface: unknown
   Provider: PublicClient
+  Signer: WalletClient
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: Record<string, unknown>
 }
@@ -322,5 +324,39 @@ export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
       address,
       slot,
     })
+  }
+
+  hexDataSlice(data: `0x${string}`, offset: number, endOffset?: number): `0x${string}` {
+    return slice(data, offset, endOffset) as `0x${string}`
+  }
+
+  joinSignature(signature: { r: string; s: string; v: number }): string {
+    // Convert r, s, v to Viem's signature format
+    const r = signature.r as `0x${string}`
+    const s = signature.s as `0x${string}`
+    const v = signature.v
+
+    // Join the signature components
+    return concat([r, s, v === 27 ? '0x1b' : '0x1c']) as string
+  }
+
+  splitSignature(signature: `0x${string}`): { r: string; s: string; v: number } {
+    // Ensure the signature is at least 65 bytes (r + s + v)
+    if (signature.length < 132) {
+      throw new Error('Invalid signature length')
+    }
+
+    // Split the signature into r, s, v components
+    const r = slice(signature, 0, 32) as `0x${string}`
+    const s = slice(signature, 32, 64) as `0x${string}`
+
+    // The v value is the last byte
+    const vByte = slice(signature, 64, 65) as `0x${string}`
+    const vInt = Number(hexToBigInt(vByte))
+
+    // Normalize v to 27 or 28
+    const v = vInt < 27 ? vInt + 27 : vInt
+
+    return { r, s, v }
   }
 }

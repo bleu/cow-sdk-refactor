@@ -14,6 +14,7 @@ import {
   Timestamp,
 } from './order'
 import { ContractsTs_Proxy } from './proxy'
+import { ContractsTs_Sign } from './sign'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   SALT: string
@@ -23,16 +24,31 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   public slot: ContractsTs_Proxy<T>['slot']
   public proxyInterface: ContractsTs_Proxy<T>['proxyInterface']
   public implementationAddress: ContractsTs_Proxy<T>['implementationAddress']
+  private sign: ContractsTs_Sign<T>
+  public EIP1271_MAGICVALUE: ContractsTs_Sign<T>['EIP1271_MAGICVALUE']
+  public EcdsaSigningScheme: ContractsTs_Sign<T>['EcdsaSigningScheme']
+  public decodeEip1271SignatureData: ContractsTs_Sign<T>['decodeEip1271SignatureData']
+  public encodeEip1271SignatureData: ContractsTs_Sign<T>['encodeEip1271SignatureData']
+  public signOrder: ContractsTs_Sign<T>['signOrder']
 
   constructor(private adapter: AbstractProviderAdapter<T>) {
     this.adapter = adapter
+
+    this.SALT = this.adapter.formatBytes32String('Mattresses in Berlin!')
+    this.DEPLOYER_CONTRACT = '0x4e59b44847b379578588920ca78fbf26c0b4956c'
+
     this.proxy = new ContractsTs_Proxy(adapter)
     this.ownerAddress = this.proxy.ownerAddress
     this.slot = this.proxy.slot
     this.proxyInterface = this.proxy.proxyInterface
     this.implementationAddress = this.proxy.implementationAddress
-    this.SALT = this.adapter.formatBytes32String('Mattresses in Berlin!')
-    this.DEPLOYER_CONTRACT = '0x4e59b44847b379578588920ca78fbf26c0b4956c'
+
+    this.sign = new ContractsTs_Sign(adapter, this)
+    this.EIP1271_MAGICVALUE = this.sign.EIP1271_MAGICVALUE
+    this.EcdsaSigningScheme = this.sign.EcdsaSigningScheme
+    this.decodeEip1271SignatureData = this.sign.decodeEip1271SignatureData
+    this.encodeEip1271SignatureData = this.sign.encodeEip1271SignatureData
+    this.signOrder = this.sign.signOrder
   }
 
   /**
