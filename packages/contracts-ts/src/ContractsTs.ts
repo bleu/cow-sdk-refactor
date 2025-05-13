@@ -1,35 +1,37 @@
 import { AbstractProviderAdapter, AdapterTypes } from '@cowprotocol/common'
 import { DeploymentArguments, MaybeNamedArtifactArtifactDeployment } from './deploy'
 import { Interaction, InteractionLike, normalizeInteraction, normalizeInteractions } from './interaction'
-import {
-  HashLike,
-  normalizeBuyTokenBalance,
-  NormalizedOrder,
-  Order,
-  ORDER_TYPE_FIELDS,
-  ORDER_UID_LENGTH,
-  OrderBalance,
-  OrderUidParams,
-  timestamp,
-  Timestamp,
-} from './order'
 import { ContractsTs_Proxy } from './proxy'
 import { ContractsTs_Sign } from './sign'
+import { ContractsTs_Order } from './order'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   SALT: string
   DEPLOYER_CONTRACT: string
+
   private proxy: ContractsTs_Proxy<T>
   public ownerAddress: ContractsTs_Proxy<T>['ownerAddress']
   public slot: ContractsTs_Proxy<T>['slot']
   public proxyInterface: ContractsTs_Proxy<T>['proxyInterface']
   public implementationAddress: ContractsTs_Proxy<T>['implementationAddress']
+
   private sign: ContractsTs_Sign<T>
   public EIP1271_MAGICVALUE: ContractsTs_Sign<T>['EIP1271_MAGICVALUE']
   public EcdsaSigningScheme: ContractsTs_Sign<T>['EcdsaSigningScheme']
   public decodeEip1271SignatureData: ContractsTs_Sign<T>['decodeEip1271SignatureData']
   public encodeEip1271SignatureData: ContractsTs_Sign<T>['encodeEip1271SignatureData']
   public signOrder: ContractsTs_Sign<T>['signOrder']
+
+  private order: ContractsTs_Order<T>
+  public timestamp: ContractsTs_Order<T>['timestamp']
+  public hashify: ContractsTs_Order<T>['hashify']
+  public normalizeBuyTokenBalance: ContractsTs_Order<T>['normalizeBuyTokenBalance']
+  public normalizeOrder: ContractsTs_Order<T>['normalizeOrder']
+  public hashTypedData: ContractsTs_Order<T>['hashTypedData']
+  public hashOrder: ContractsTs_Order<T>['hashOrder']
+  public computeOrderUid: ContractsTs_Order<T>['computeOrderUid']
+  public packOrderUidParams: ContractsTs_Order<T>['packOrderUidParams']
+  public extractOrderUidParams: ContractsTs_Order<T>['extractOrderUidParams']
 
   constructor(private adapter: AbstractProviderAdapter<T>) {
     this.adapter = adapter
@@ -49,6 +51,17 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
     this.decodeEip1271SignatureData = this.sign.decodeEip1271SignatureData
     this.encodeEip1271SignatureData = this.sign.encodeEip1271SignatureData
     this.signOrder = this.sign.signOrder
+
+    this.order = new ContractsTs_Order(adapter)
+    this.timestamp = this.order.timestamp
+    this.hashify = this.order.hashify
+    this.normalizeBuyTokenBalance = this.order.normalizeBuyTokenBalance
+    this.normalizeOrder = this.order.normalizeOrder
+    this.hashTypedData = this.order.hashTypedData
+    this.hashOrder = this.order.hashOrder
+    this.computeOrderUid = this.order.computeOrderUid
+    this.packOrderUidParams = this.order.packOrderUidParams
+    this.extractOrderUidParams = this.order.extractOrderUidParams
   }
 
   /**
@@ -105,127 +118,6 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
       version: 'v2',
       chainId,
       verifyingContract,
-    }
-  }
-
-  /**
-   * Normalizes a timestamp value to a Unix timestamp.
-   * @param time The timestamp value to normalize.
-   * @return Unix timestamp or number of seconds since the Unix Epoch.
-   */
-  public timestamp(t: Timestamp): number {
-    return timestamp(t)
-  }
-
-  /**
-   * Normalizes an app data value to a 32-byte hash.
-   * @param hashLike A hash-like value to normalize.
-   * @returns A 32-byte hash encoded as a hex-string.
-   */
-  public hashify<T extends AdapterTypes>(h: HashLike<T>): string {
-    return typeof h === 'number' ? `0x${h.toString(16).padStart(64, '0')}` : this.adapter.hexZeroPad(h, 32)
-  }
-
-  /**
-   * Normalizes the balance configuration for a buy token. Specifically, this
-   * function ensures that {@link OrderBalance.EXTERNAL} gets normalized to
-   * {@link OrderBalance.ERC20}.
-   *
-   * @param balance The balance configuration.
-   * @returns The normalized balance configuration.
-   */
-  public normalizeBuyTokenBalance(balance: OrderBalance | undefined): OrderBalance.ERC20 | OrderBalance.INTERNAL {
-    return normalizeBuyTokenBalance(balance)
-  }
-
-  /**
-   * Normalizes an order for hashing and signing, so that it can be used with
-   * Ethers.js for EIP-712 operations.
-   * @param hashLike A hash-like value to normalize.
-   * @returns A 32-byte hash encoded as a hex-string.
-   */
-  public normalizeOrder(order: Order<T>): NormalizedOrder<T> {
-    if (order.receiver === this.adapter.ZERO_ADDRESS) {
-      throw new Error('receiver cannot be address(0)')
-    }
-
-    const normalizedOrder = {
-      ...order,
-      sellTokenBalance: order.sellTokenBalance ?? OrderBalance.ERC20,
-      receiver: order.receiver ?? this.adapter.ZERO_ADDRESS,
-      validTo: timestamp(order.validTo),
-      appData: this.hashify(order.appData),
-      buyTokenBalance: normalizeBuyTokenBalance(order.buyTokenBalance),
-    }
-    return normalizedOrder
-  }
-
-  /**
-   * Compute the 32-byte signing hash for the specified order.
-   *
-   * @param domain The EIP-712 domain separator to compute the hash for.
-   * @param types The order to compute the digest for.
-   * @return Hex-encoded 32-byte order digest.
-   */
-  public hashTypedData(
-    domain: T['TypedDataDomain'],
-    types: T['TypedDataTypes'],
-    data: Record<string, unknown>,
-  ): string {
-    return this.adapter.hashTypedData(domain, types, data)
-  }
-
-  /**
-   * Compute the 32-byte signing hash for the specified order.
-   *
-   * @param domain The EIP-712 domain separator to compute the hash for.
-   * @param order The order to compute the digest for.
-   * @return Hex-encoded 32-byte order digest.
-   */
-  public hashOrder(domain: T['TypedDataDomain'], order: Order<T>): string {
-    return this.hashTypedData(domain, { Order: ORDER_TYPE_FIELDS }, this.normalizeOrder(order))
-  }
-
-  /**
-   * Computes the order UID for an order and the given owner.
-   */
-  public computeOrderUid(domain: T['TypedDataDomain'], order: Order<T>, owner: string): string {
-    return this.packOrderUidParams({
-      orderDigest: this.hashOrder(domain, order),
-      owner,
-      validTo: order.validTo,
-    })
-  }
-
-  /**
-   * Compute the unique identifier describing a user order in the settlement
-   * contract.
-   *
-   * @param OrderUidParams The parameters used for computing the order's unique
-   * identifier.
-   * @returns A string that unequivocally identifies the order of the user.
-   */
-  public packOrderUidParams({ orderDigest, owner, validTo }: OrderUidParams): string {
-    return this.adapter.solidityPack(['bytes32', 'address', 'uint32'], [orderDigest, owner, timestamp(validTo)])
-  }
-
-  /**
-   * Extracts the order unique identifier parameters from the specified bytes.
-   *
-   * @param orderUid The order UID encoded as a hexadecimal string.
-   * @returns The extracted order UID parameters.
-   */
-  public extractOrderUidParams(orderUid: string): OrderUidParams {
-    const bytes = this.adapter.arrayify(orderUid)
-    if (bytes.length != ORDER_UID_LENGTH) {
-      throw new Error('invalid order UID length')
-    }
-
-    const view = new DataView(bytes.buffer)
-    return {
-      orderDigest: this.adapter.hexlify(bytes.subarray(0, 32)),
-      owner: this.adapter.getChecksumAddress(this.adapter.hexlify(bytes.subarray(32, 52))),
-      validTo: view.getUint32(52),
     }
   }
   // ... other methods from contracts-ts that need adapter
