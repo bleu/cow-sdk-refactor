@@ -1,9 +1,13 @@
+import { AdapterUtils } from './types'
+
 /**
  * AbstractProviderAdapter defines the common interface that all provider-specific
  * implementations must follow. This ensures consistent interaction with different
  * Ethereum libraries throughout the SDK.
  */
 export interface AbstractProviderAdapter {
+  utils: AdapterUtils
+
   // Core functionality
   getChainId(): Promise<number>
   getAddress(): Promise<string>

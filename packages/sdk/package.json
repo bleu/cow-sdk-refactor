@@ -1,0 +1,37 @@
+{
+  "name": "@cowprotocol/cow-sdk",
+  "version": "0.1.0",
+  "description": "CowProtocol SDK",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "license": "MIT",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --watch --dts",
+    "lint": "eslint src/**/*.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.31",
+    "ts-node": "^10.8.2",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@cowprotocol/common": "workspace:*",
+    "@cowprotocol/cow-app-data": "workspace:*"
+  },
+  "peerDependencies": {
+    "cross-fetch": "^3.x",
+    "ipfs-only-hash": "^4.x",
+    "multiformats": "^9.x"
+  }
+}

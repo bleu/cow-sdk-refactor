@@ -3,5 +3,5 @@
  * @module @cowprotocol/common
  */
 
-export * from "./cow-error";
-export * from "./adapters";
+export * from './cow-error'
+export * from './adapters'

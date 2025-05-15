@@ -8,10 +8,12 @@ import {
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 import { TypedDataDomain } from 'ethers'
+import { EthersV6Utils } from './EthersV6Utils'
 
 export class EthersV6Adapter implements AbstractProviderAdapter {
   private provider: Provider
   private signer: Signer
+  public utils: EthersV6Utils
 
   constructor(providerOrSigner: Provider | Signer) {
     if (
@@ -28,6 +30,8 @@ export class EthersV6Adapter implements AbstractProviderAdapter {
       this.provider = providerOrSigner as Provider
       this.signer = new VoidSigner('0x0000000000000000000000000000000000000000', this.provider)
     }
+
+    this.utils = new EthersV6Utils()
   }
 
   async getChainId(): Promise<number> {
