@@ -225,6 +225,9 @@ importers:
       '@cowprotocol/config':
         specifier: workspace:*
         version: link:../config
+      cross-fetch:
+        specifier: ^3.2.0
+        version: 3.2.0
       exponential-backoff:
         specifier: ^3.1.2
         version: 3.1.2

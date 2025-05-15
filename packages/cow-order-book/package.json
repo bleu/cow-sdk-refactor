@@ -35,6 +35,7 @@
   "dependencies": {
     "@cowprotocol/config": "workspace:*",
     "@cowprotocol/common": "workspace:*",
+    "cross-fetch": "^3.2.0",
     "exponential-backoff": "^3.1.2",
     "limiter": "^3.0.0"
   },
