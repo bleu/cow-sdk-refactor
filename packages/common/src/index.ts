@@ -5,3 +5,4 @@
 
 export * from './cow-error'
 export * from './adapters'
+export * from './utils'
