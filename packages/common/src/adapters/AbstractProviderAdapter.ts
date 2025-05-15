@@ -1,4 +1,4 @@
-import { AppDataUtils } from './types'
+import { AdapterUtils } from './types'
 
 /**
  * AbstractProviderAdapter defines the common interface that all provider-specific
@@ -6,6 +6,8 @@ import { AppDataUtils } from './types'
  * Ethereum libraries throughout the SDK.
  */
 export interface AbstractProviderAdapter {
+  utils: AdapterUtils
+
   // Core functionality
   getChainId(): Promise<number>
   getAddress(): Promise<string>
@@ -26,9 +28,6 @@ export interface AbstractProviderAdapter {
 
   // Contract interaction
   getContract(address: string, abi: unknown): unknown
-
-  // app-data utils
-  getAppDataUtils(): AppDataUtils
 }
 
 /**

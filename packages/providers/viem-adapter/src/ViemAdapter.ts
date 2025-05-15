@@ -17,15 +17,15 @@ import {
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
-  AppDataUtils,
 } from '@cowprotocol/common'
 import { SignTypedDataParameters } from 'viem/accounts'
-import { ViemAppDataUtils } from './ViemAppDataUtils'
+import { ViemUtils } from './ViemUtils'
 
 export class ViemAdapter implements AbstractProviderAdapter {
   private publicClient: PublicClient
   private walletClient: WalletClient
   private account?: Account
+  public utils: ViemUtils
 
   constructor(chain: Chain, transport: Transport = http(), account?: Account | `0x${string}`) {
     this.publicClient = createPublicClient({
@@ -41,10 +41,12 @@ export class ViemAdapter implements AbstractProviderAdapter {
     if (account) {
       this.account = typeof account === 'string' ? ({ address: account } as Account) : account
     }
+
+    this.utils = new ViemUtils()
   }
 
   async getChainId(): Promise<number> {
-    return this.publicClient.chain?.id ?? 0 //TODO - verify if this is correct
+    return this.publicClient.chain?.id ?? 0
   }
 
   async getAddress(): Promise<string> {
@@ -96,7 +98,7 @@ export class ViemAdapter implements AbstractProviderAdapter {
           type: receipt.type,
           transactionIndex: receipt.transactionIndex,
           logsBloom: receipt.logsBloom,
-        } as unknown as TransactionReceipt //TODO - review this
+        } as unknown as TransactionReceipt
       },
     }
   }
@@ -160,7 +162,7 @@ export class ViemAdapter implements AbstractProviderAdapter {
     const code = await this.publicClient.getCode({
       address: address as `0x${string}`,
     })
-    return code ?? '0x' //TODO - review this
+    return code ?? '0x'
   }
 
   async getBalance(address: string): Promise<bigint> {
@@ -182,9 +184,5 @@ export class ViemAdapter implements AbstractProviderAdapter {
       abi,
       client: this.publicClient,
     })
-  }
-
-  getAppDataUtils(): AppDataUtils {
-    return new ViemAppDataUtils()
   }
 }

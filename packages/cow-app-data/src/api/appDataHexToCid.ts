@@ -76,7 +76,7 @@ interface ToCidParams {
 }
 
 async function _toCidBytes(params: ToCidParams): Promise<Uint8Array> {
-  const hashBytes = getGlobalAdapter().getAppDataUtils().arrayify(params.multihashHex)
+  const hashBytes = getGlobalAdapter().utils.arrayify(params.multihashHex)
 
   // Concat prefix and multihash
   const cidPrefix = Uint8Array.from([params.version, params.multicodec, params.hashingAlgorithm, params.hashingLength])

@@ -1,7 +1,7 @@
 import { toBytes, stringToBytes, keccak256 as _keccak256 } from 'viem'
-import { AppDataUtils } from '@cowprotocol/common'
+import { AdapterUtils } from '@cowprotocol/common'
 
-export class ViemAppDataUtils implements AppDataUtils {
+export class ViemUtils implements AdapterUtils {
   keccak256(data: string | Uint8Array): string {
     const bytes = typeof data === 'string' ? stringToBytes(data) : data
     return _keccak256(bytes)

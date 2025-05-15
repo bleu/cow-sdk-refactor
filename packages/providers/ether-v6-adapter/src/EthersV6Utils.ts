@@ -1,7 +1,7 @@
 import { getBytes, keccak256 as _keccak256, toUtf8Bytes } from 'ethers'
-import { AppDataUtils } from '@cowprotocol/common'
+import { AdapterUtils } from '@cowprotocol/common'
 
-export class EthersV6AppDataUtils implements AppDataUtils {
+export class EthersV6Utils implements AdapterUtils {
   keccak256(data: string | Uint8Array): string {
     return _keccak256(data)
   }

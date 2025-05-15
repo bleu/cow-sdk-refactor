@@ -1,13 +1,14 @@
 import { ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
-import { AbstractProviderAdapter, AppDataUtils, TransactionParams, TransactionResponse } from '@cowprotocol/common'
-import { EthersV5AppDataUtils } from './EthersV5AppDataUtils'
+import { AbstractProviderAdapter, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { EthersV5Utils } from './EthersV5Utils'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
 
 export class EthersV5Adapter implements AbstractProviderAdapter {
   private provider: ethers.providers.Provider
   private signer: ethers.Signer & TypedDataSigner
+  public utils: EthersV5Utils
 
   constructor(providerOrSigner: ethers.providers.Provider | ethers.Signer) {
     if (ethers.Signer.isSigner(providerOrSigner)) {
@@ -23,6 +24,8 @@ export class EthersV5Adapter implements AbstractProviderAdapter {
         this.provider,
       ) as ethers.Signer & TypedDataSigner
     }
+
+    this.utils = new EthersV5Utils()
   }
 
   async getChainId(): Promise<number> {
@@ -111,9 +114,5 @@ export class EthersV5Adapter implements AbstractProviderAdapter {
 
   getContract(address: string, abi: Abi): unknown {
     return new ethers.Contract(address, abi, this.signer)
-  }
-
-  getAppDataUtils(): AppDataUtils {
-    return new EthersV5AppDataUtils()
   }
 }

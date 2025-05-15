@@ -88,7 +88,7 @@ export async function _appDataToCidAux(
   const [appDataDoc, fullAppData] =
     typeof appDataAux === 'string'
       ? [JSON.parse(appDataAux), appDataAux]
-      : [appDataAux, await stringifyDeterministic(appDataAux)]
+      : [appDataAux, await stringifyDeterministic(appDataAux as Record<string, unknown>)]
 
   const validation = await validateAppDataDoc(appDataDoc)
 
@@ -119,8 +119,8 @@ export async function _appDataToCidAux(
  * @returns the IPFS CID v0 of the content
  */
 async function _appDataToCid(fullAppDataJson: string): Promise<string> {
-  const appDataUtils = getGlobalAdapter().getAppDataUtils()
-  const appDataHex = appDataUtils.keccak256(appDataUtils.toUtf8Bytes(fullAppDataJson))
+  const adapter = getGlobalAdapter()
+  const appDataHex = adapter.utils.keccak256(adapter.utils.toUtf8Bytes(fullAppDataJson))
   return appDataHexToCid(appDataHex)
 }
 
@@ -131,7 +131,7 @@ async function _appDataToCid(fullAppDataJson: string): Promise<string> {
  * @returns IPFS CID
  */
 export async function _appDataToCidLegacy(doc: AnyAppDataDocVersion | string): Promise<string> {
-  const fullAppData = typeof doc === 'string' ? doc : await stringifyDeterministic(doc)
+  const fullAppData = typeof doc === 'string' ? doc : await stringifyDeterministic(doc as Record<string, unknown>)
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
