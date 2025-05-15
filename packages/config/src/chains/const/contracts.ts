@@ -74,13 +74,6 @@ export const ALL_SUPPORTED_CHAINS_MAP: Record<SupportedChainId, ChainInfo> = {
 export const ALL_SUPPORTED_CHAINS = Object.values(ALL_SUPPORTED_CHAINS_MAP)
 
 /**
- * The list of supported chains.
- */
-export const ALL_SUPPORTED_CHAIN_IDS: SupportedChainId[] = ALL_SUPPORTED_CHAINS.map(
-  (chain) => chain.id,
-) as SupportedChainId[]
-
-/**
  * Maps a chain where you can bridge to, but not sell tokens from (not supported by CoW Protocol)
  */
 export const ADDITIONAL_TARGET_CHAINS_MAP: Record<AdditionalTargetChainId, ChainInfo> = {
