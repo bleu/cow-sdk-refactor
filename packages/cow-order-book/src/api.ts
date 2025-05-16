@@ -87,44 +87,138 @@ export type GetOrdersRequest = {
  * - Request signing
  * - Request validation
  *
- * @example
+ * @example Usage with the standalone OrderBook module:
  *
  * ```typescript
- * import { OrderBookApi, OrderSigningUtils, SupportedChainId } from '@cowprotocol/cow-sdk'
- * import { Web3Provider } from '@ethersproject/providers'
+ * import { OrderBookApi } from '@cowprotocol/cow-order-book'
+ * import { OrderSigningUtils, SupportedChainId } from '@cowprotocol/cow-sdk'
+ * import { ethers } from 'ethers'
  *
- * const account = 'YOUR_WALLET_ADDRESS'
- * const chainId = 100 // Gnosis chain
- * const provider = new Web3Provider(window.ethereum)
+ * // Setup provider and signer
+ * const provider = new ethers.providers.Web3Provider(window.ethereum)
  * const signer = provider.getSigner()
+ * const account = await signer.getAddress()
  *
+ * // Create OrderBook API instance
+ * const orderBookApi = new OrderBookApi({
+ *   chainId: SupportedChainId.GNOSIS_CHAIN,
+ *   env: 'prod'
+ * })
+ *
+ * // Create a quote request
  * const quoteRequest = {
- *   sellToken: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1', // WETH gnosis chain
- *   buyToken: '0x9c58bacc331c9aa871afd802db6379a98e80cedb', // GNO gnosis chain
+ *   sellToken: '0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1', // WETH on Gnosis Chain
+ *   buyToken: '0x9c58bacc331c9aa871afd802db6379a98e80cedb',  // GNO on Gnosis Chain
  *   from: account,
  *   receiver: account,
- *   sellAmountBeforeFee: (0.4 * 10 ** 18).toString(), // 0.4 WETH
- *   kind: OrderQuoteSide.kind.SELL,
+ *   sellAmountBeforeFee: ethers.utils.parseEther('0.4').toString(), // 0.4 WETH
+ *   kind: 'sell',
  * }
  *
- * const orderBookApi = new OrderBookApi({ chainId: SupportedChainId.GNOSIS_CHAIN })
- *
  * async function main() {
+ *   try {
+ *     // Get a quote
  *     const { quote } = await orderBookApi.getQuote(quoteRequest)
  *
- *     const orderSigningResult = await OrderSigningUtils.signOrder(quote, chainId, signer)
+ *     const orderSigningResult = await OrderSigningUtils.signOrder(
+ *       quote,
+ *       SupportedChainId.GNOSIS_CHAIN,
+ *       signer
+ *     )
  *
- *     const orderId = await orderBookApi.sendOrder({ ...quote, ...orderSigningResult })
  *
+ *     const orderId = await orderBookApi.sendOrder({
+ *       ...quote,
+ *       ...orderSigningResult
+ *     })
+ *
+ *     // Get order details
  *     const order = await orderBookApi.getOrder(orderId)
  *
- *     const trades = await orderBookApi.getTrades({ orderId })
+ *     // Get trades for the order
+ *     const trades = await orderBookApi.getTrades({ orderUid: orderId })
  *
- *     const orderCancellationSigningResult = await OrderSigningUtils.signOrderCancellations([orderId], chainId, signer)
+ *     console.log('Order submitted successfully:', {
+ *       orderId,
+ *       orderDetails: order,
+ *       trades
+ *     })
+ *   } catch (error) {
+ *     console.error('Error trading on CoW Protocol:', error)
+ *   }
+ * }
+ * ```
  *
- *     const cancellationResult = await orderBookApi.sendSignedOrderCancellations({...orderCancellationSigningResult, orderUids: [orderId] })
+ * @example Usage with the complete CoW SDK:
  *
- *     console.log('Results: ', { orderId, order, trades, orderCancellationSigningResult, cancellationResult })
+ * ```typescript
+ * import { CowSdk, OrderSigningUtils, SupportedChainId } from '@cowprotocol/cow-sdk'
+ * import { EthersV6Adapter } from '@cowprotocol/sdk-ethers-v6-adapter'
+ * import { ethers } from 'ethers'
+ *
+ * // Setup provider and adapter
+ * const provider = new ethers.BrowserProvider(window.ethereum)
+ * const signer = await provider.getSigner()
+ * const adapter = new EthersV6Adapter(signer)
+ * const account = await signer.getAddress()
+ *
+ * // Initialize the SDK with the adapter
+ * const cowSdk = new CowSdk({
+ *   adapter,
+ *   chainId: SupportedChainId.MAINNET
+ * })
+ *
+ * // Create a quote request
+ * const quoteRequest = {
+ *   sellToken: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH on Ethereum
+ *   buyToken: '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI on Ethereum
+ *   from: account,
+ *   receiver: account,
+ *   sellAmountBeforeFee: ethers.parseEther('0.1').toString(), // 0.1 ETH
+ *   kind: 'sell',
+ * }
+ *
+ * async function tradeWithSdk() {
+ *   try {
+ *     // Get a quote using the OrderBook module from the SDK
+ *     const { quote } = await cowSdk.orderBook.getQuote(quoteRequest)
+ *     console.log('Quote received:', quote)
+ *
+ *     // Sign the order using OrderSigningUtils
+ *     const orderSigningResult = await OrderSigningUtils.signOrder(
+ *       quote,
+ *       SupportedChainId.MAINNET,
+ *       signer
+ *     )
+ *
+ *     // Submit the order
+ *     const orderId = await cowSdk.orderBook.sendOrder({
+ *       ...quote,
+ *       ...orderSigningResult
+ *     })
+ *
+ *     // Get order details
+ *     const order = await cowSdk.orderBook.getOrder(orderId)
+ *
+ *     // Get trades for the order
+ *     const trades = await cowSdk.orderBook.getTrades({ orderUid: orderId })
+ *
+ *     // You can also use AppData module for metadata
+ *     const appDataInfo = await cowSdk.appData.getAppDataInfo(JSON.stringify({
+ *       version: '0.7.0',
+ *       appCode: 'CoW Swap SDK Example',
+ *       metadata: {},
+ *     }))
+ *
+ *     console.log('Order submitted successfully:', {
+ *       orderId,
+ *       orderDetails: order,
+ *       trades,
+ *       appDataInfo
+ *     })
+ *   } catch (error) {
+ *     console.error('Error trading on CoW Protocol:', error)
+ *   }
  * }
  * ```
  *
