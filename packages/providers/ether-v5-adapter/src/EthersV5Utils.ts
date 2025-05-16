@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-import { AdapterUtils } from '@cowprotocol/common'
+import { AdapterUtils } from '@cowprotocol/sdk-common'
 
 export class EthersV5Utils implements AdapterUtils {
   keccak256(data: string | Uint8Array): string {

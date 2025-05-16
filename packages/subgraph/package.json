@@ -32,8 +32,8 @@
     "jest-fetch-mock": "^3.0.3"
   },
   "dependencies": {
-    "@cowprotocol/common": "workspace:*",
-    "@cowprotocol/config": "workspace:*",
+    "@cowprotocol/sdk-common": "workspace:*",
+    "@cowprotocol/sdk-config": "workspace:*",
     "graphql": "^16.11.0",
     "graphql-request": "^4.3.0"
   },

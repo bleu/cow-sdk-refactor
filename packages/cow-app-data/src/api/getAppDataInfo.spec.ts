@@ -12,20 +12,20 @@ import {
   CID_LEGACY,
 } from '../mocks'
 import { getAppDataInfo, getAppDataInfoLegacy } from './getAppDataInfo'
-import { AbstractProviderAdapter } from '@cowprotocol/common'
+import { AbstractProviderAdapter } from '@cowprotocol/sdk-common'
 
 // Create a mock adapter
 const mockAdapter: Partial<AbstractProviderAdapter> = {
-  getAppDataUtils: () => ({
+  utils: {
     arrayify: () => new Uint8Array([1, 2, 3, 4]),
     keccak256: () => APP_DATA_HEX,
     toUtf8Bytes: () => new Uint8Array([1, 2, 3, 4]),
-  }),
+  },
 }
 
 // Mock modules
-jest.mock('@cowprotocol/common', () => {
-  const original = jest.requireActual('@cowprotocol/common')
+jest.mock('@cowprotocol/sdk-common', () => {
+  const original = jest.requireActual('@cowprotocol/sdk-common')
   return {
     ...original,
     getGlobalAdapter: jest.fn(() => mockAdapter),

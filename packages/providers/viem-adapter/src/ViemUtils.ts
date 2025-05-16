@@ -1,5 +1,5 @@
 import { toBytes, stringToBytes, keccak256 as _keccak256 } from 'viem'
-import { AdapterUtils } from '@cowprotocol/common'
+import { AdapterUtils } from '@cowprotocol/sdk-common'
 
 export class ViemUtils implements AdapterUtils {
   keccak256(data: string | Uint8Array): string {
