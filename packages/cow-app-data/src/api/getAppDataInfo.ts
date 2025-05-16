@@ -1,4 +1,4 @@
-import { getGlobalAdapter } from '@cowprotocol/common'
+import { getGlobalAdapter } from '@cowprotocol/sdk-common'
 import { MetaDataError } from '../consts'
 import { AnyAppDataDocVersion } from '../generatedTypes'
 import { AppDataInfo } from '../types'

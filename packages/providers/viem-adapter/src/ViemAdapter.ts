@@ -17,7 +17,7 @@ import {
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
-} from '@cowprotocol/common'
+} from '@cowprotocol/sdk-common'
 import { SignTypedDataParameters } from 'viem/accounts'
 import { ViemUtils } from './ViemUtils'
 

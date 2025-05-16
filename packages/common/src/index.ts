@@ -1,6 +1,6 @@
 /**
  * Common utilities and types for CoW Protocol SDK
- * @module @cowprotocol/common
+ * @module @cowprotocol/sdk-common
  */
 
 export * from './cow-error'

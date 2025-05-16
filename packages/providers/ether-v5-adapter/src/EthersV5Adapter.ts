@@ -1,6 +1,6 @@
 import { ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
-import { AbstractProviderAdapter, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { AbstractProviderAdapter, TransactionParams, TransactionResponse } from '@cowprotocol/sdk-common'
 import { EthersV5Utils } from './EthersV5Utils'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]

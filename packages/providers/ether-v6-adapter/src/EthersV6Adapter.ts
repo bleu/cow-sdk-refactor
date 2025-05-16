@@ -4,7 +4,7 @@ import {
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
-} from '@cowprotocol/common'
+} from '@cowprotocol/sdk-common'
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 import { TypedDataDomain } from 'ethers'

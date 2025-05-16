@@ -1,6 +1,6 @@
 import { APP_DATA_DOC_CUSTOM, APP_DATA_HEX_LEGACY, CID_LEGACY } from '../mocks'
 import { fetchDocFromAppDataHex, fetchDocFromAppDataHexLegacy } from './fetchDocFromAppData'
-import { AbstractProviderAdapter } from '@cowprotocol/common'
+import { AbstractProviderAdapter } from '@cowprotocol/sdk-common'
 import fetchMock from 'jest-fetch-mock'
 import { appDataHexToCidLegacy } from './appDataHexToCid'
 import { fetchDocFromCid } from './fetchDocFromCid'
@@ -9,16 +9,16 @@ fetchMock.enableMocks()
 
 // Create a mock adapter
 const mockAdapter: Partial<AbstractProviderAdapter> = {
-  getAppDataUtils: () => ({
+  utils: {
     arrayify: () => new Uint8Array([1, 2, 3, 4]),
     keccak256: () => '0x12345678',
     toUtf8Bytes: () => new Uint8Array([1, 2, 3, 4]),
-  }),
+  },
 }
 
 // Mock the modules
-jest.mock('@cowprotocol/common', () => {
-  const original = jest.requireActual('@cowprotocol/common')
+jest.mock('@cowprotocol/sdk-common', () => {
+  const original = jest.requireActual('@cowprotocol/sdk-common')
   return {
     ...original,
     getGlobalAdapter: jest.fn(() => mockAdapter),

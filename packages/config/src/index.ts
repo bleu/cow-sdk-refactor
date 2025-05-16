@@ -1,6 +1,6 @@
 /**
  * Configuration constants and settings for CoW Protocol SDK
- * @module @cowprotocol/config
+ * @module @cowprotocol/sdk-config
  */
 export * from './chains'
 export * from './constants'

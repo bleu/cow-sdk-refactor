@@ -1,8 +1,8 @@
 import fetchMock, { enableFetchMocks } from 'jest-fetch-mock'
-import { CowError } from '@cowprotocol/common'
+import { CowError } from '@cowprotocol/sdk-common'
 import { OrderBookApi } from './api'
 import { BuyTokenDestination, EcdsaSigningScheme, OrderKind, SellTokenSource, SigningScheme } from './generated'
-import { SupportedChainId, ETH_ADDRESS } from '@cowprotocol/config'
+import { SupportedChainId, ETH_ADDRESS } from '@cowprotocol/sdk-config'
 import { AUCTION } from './mock'
 
 enableFetchMocks()

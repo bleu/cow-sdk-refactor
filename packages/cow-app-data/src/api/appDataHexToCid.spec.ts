@@ -1,7 +1,6 @@
 import { APP_DATA_HEX, APP_DATA_HEX_LEGACY, CID, CID_LEGACY } from '../mocks'
 import { appDataHexToCid, appDataHexToCidLegacy } from './appDataHexToCid'
-import * as common from '@cowprotocol/common'
-import { AbstractProviderAdapter } from '@cowprotocol/common'
+import { AbstractProviderAdapter, getGlobalAdapter } from '@cowprotocol/sdk-common'
 
 jest.mock('multiformats/bases/base16', () => ({
   base16: {
@@ -20,7 +19,7 @@ jest.mock('multiformats/cid', () => ({
 }))
 
 const mockAdapter: Partial<AbstractProviderAdapter> = {
-  getAppDataUtils: () => ({
+  utils: {
     arrayify: (value: string) => {
       if (value === 'invalidHash') {
         throw new Error('Invalid hash format')
@@ -29,12 +28,12 @@ const mockAdapter: Partial<AbstractProviderAdapter> = {
     },
     keccak256: (data: string | Uint8Array) => '0x' + data.toString(),
     toUtf8Bytes: (text: string) => new Uint8Array([...text].map((c) => c.charCodeAt(0))),
-  }),
+  },
 }
 
 // Mock the getGlobalAdapter function
-jest.mock('@cowprotocol/common', () => {
-  const original = jest.requireActual('@cowprotocol/common')
+jest.mock('@cowprotocol/sdk-common', () => {
+  const original = jest.requireActual('@cowprotocol/sdk-common')
   return {
     ...original,
     getGlobalAdapter: jest.fn(() => mockAdapter),
@@ -57,12 +56,12 @@ describe('appDataHexToCid', () => {
     // then
     expect(decodedAppDataHex).toEqual(CID)
     // Verify getGlobalAdapter was called
-    expect(common.getGlobalAdapter).toHaveBeenCalled()
+    expect(getGlobalAdapter).toHaveBeenCalled()
   })
 
   test('Throws with wrong hash format', async () => {
     // Configure mock adapter to throw for invalidHash
-    ;(common.getGlobalAdapter as jest.Mock).mockImplementation(() => ({
+    ;(getGlobalAdapter as jest.Mock).mockImplementation(() => ({
       ...mockAdapter,
       getAppDataUtils: () => ({
         arrayify: (value: string) => {
@@ -92,12 +91,12 @@ describe('appDataHexToCidLegacy', () => {
     // then
     expect(decodedAppDataHex).toEqual(CID_LEGACY)
     // Verify getGlobalAdapter was called
-    expect(common.getGlobalAdapter).toHaveBeenCalled()
+    expect(getGlobalAdapter).toHaveBeenCalled()
   })
 
   test('Throws with wrong hash format', async () => {
     // Configure mock adapter to throw for invalidHash
-    ;(common.getGlobalAdapter as jest.Mock).mockImplementation(() => ({
+    ;(getGlobalAdapter as jest.Mock).mockImplementation(() => ({
       ...mockAdapter,
       getAppDataUtils: () => ({
         arrayify: (value: string) => {
