@@ -1,5 +1,7 @@
 import type { AdapterTypes } from './types'
 
+import { AdapterUtils } from './types'
+
 /**
  * AbstractProviderAdapter defines the common interface that all provider-specific
  * implementations must follow. This ensures consistent interaction with different
@@ -9,6 +11,8 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
   protected _type?: T
 
   public ZERO_ADDRESS!: T['Address']
+
+  public utils: AdapterUtils
 
   // Core functionality
   abstract getChainId(): Promise<number>

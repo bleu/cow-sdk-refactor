@@ -54,12 +54,14 @@ interface EthersV6Types extends AdapterTypes {
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: Record<string, TypedDataField[]>
 }
+import { EthersV6Utils } from './EthersV6Utils'
 
 export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
   declare protected _type?: EthersV6Types
 
   private provider: Provider
   private signer: Signer
+  public utils: EthersV6Utils
 
   constructor(providerOrSigner: Provider | Signer) {
     super()
@@ -78,6 +80,8 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
       this.provider = providerOrSigner as Provider
       this.signer = new VoidSigner('0x0000000000000000000000000000000000000000', this.provider)
     }
+
+    this.utils = new EthersV6Utils()
   }
 
   async getChainId(): Promise<number> {

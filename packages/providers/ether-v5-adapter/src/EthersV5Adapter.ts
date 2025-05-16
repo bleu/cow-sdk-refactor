@@ -2,6 +2,7 @@ import { BigNumberish, BytesLike, ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
 import { AbstractProviderAdapter, AdapterTypes, TransactionParams, TransactionResponse } from '@cowprotocol/common'
 import { DeploymentArguments } from '@cowprotocol/contracts-ts'
+import { EthersV5Utils } from './EthersV5Utils'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
 type Interface = ethers.utils.Interface
@@ -23,6 +24,7 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
 
   private provider: ethers.providers.Provider
   private signer: ethers.Signer & TypedDataSigner
+  public utils: EthersV5Utils
 
   constructor(providerOrSigner: ethers.providers.Provider | ethers.Signer) {
     super()
@@ -40,6 +42,8 @@ export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
         this.provider,
       ) as ethers.Signer & TypedDataSigner
     }
+
+    this.utils = new EthersV5Utils()
   }
 
   async getChainId(): Promise<number> {
