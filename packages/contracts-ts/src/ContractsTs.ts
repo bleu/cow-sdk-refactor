@@ -23,6 +23,22 @@ import {
   signOrder,
 } from './sign'
 import { grantRequiredRoles, VAULT_INTERFACE } from './vault'
+import {
+  encodeSigningScheme,
+  decodeSigningScheme,
+  encodeOrderFlags,
+  decodeOrderFlags,
+  encodeTradeFlags,
+  decodeTradeFlags,
+  encodeSignatureData,
+  decodeSignatureOwner,
+  encodeTrade,
+  decodeOrder,
+  TokenRegistry,
+  SettlementEncoder,
+  InteractionStage,
+  FLAG_MASKS,
+} from './settlement'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   // Make ORDER_TYPE_FIELDS and ORDER_UID_LENGTH available
@@ -30,7 +46,7 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   public ORDER_UID_LENGTH = ORDER_UID_LENGTH
 
   /**
-   * Creates a new AppDataApi instance
+   * Creates a new ContractsTs instance
    *
    * @param adapter Provider adapter implementation
    */
@@ -65,6 +81,21 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
 
   grantRequiredRoles = grantRequiredRoles
   VAULT_INTERFACE = VAULT_INTERFACE
+
+  encodeSigningScheme = encodeSigningScheme
+  decodeSigningScheme = decodeSigningScheme
+  encodeOrderFlags = encodeOrderFlags
+  decodeOrderFlags = decodeOrderFlags
+  encodeTradeFlags = encodeTradeFlags
+  decodeTradeFlags = decodeTradeFlags
+  encodeSignatureData = encodeSignatureData
+  decodeSignatureOwner = decodeSignatureOwner
+  encodeTrade = encodeTrade
+  decodeOrder = decodeOrder
+  TokenRegistry = TokenRegistry
+  SettlementEncoder = SettlementEncoder
+  InteractionStage = InteractionStage
+  FLAG_MASKS = FLAG_MASKS
 
   /**
    * Return the Gnosis Protocol v2 domain used for signing.
