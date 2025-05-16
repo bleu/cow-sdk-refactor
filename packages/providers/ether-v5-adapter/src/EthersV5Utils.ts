@@ -2,7 +2,6 @@ import { BigNumberish, BytesLike, ethers, TypedDataDomain, TypedDataField } from
 import { AdapterUtils } from '@cowprotocol/common'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
-type Interface = ethers.utils.Interface
 
 export class EthersV5Utils implements AdapterUtils {
   toUtf8Bytes(text: string): Uint8Array {
@@ -25,7 +24,7 @@ export class EthersV5Utils implements AdapterUtils {
     return ethers.utils.formatBytes32String(text)
   }
 
-  encodeDeploy<C>(encodeDeployArgs: any, abi: Abi) {
+  encodeDeploy(encodeDeployArgs: unknown[], abi: Abi) {
     const contractInterface = new ethers.utils.Interface(abi)
     return contractInterface.encodeDeploy(encodeDeployArgs)
   }
@@ -47,7 +46,7 @@ export class EthersV5Utils implements AdapterUtils {
   }
 
   // eslint-disable-next-line
-  solidityPack(types: string[], values: any[]): string {
+  solidityPack(types: string[], values: unknown[]): string {
     return ethers.utils.solidityPack(types, values)
   }
 
