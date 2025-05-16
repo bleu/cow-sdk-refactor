@@ -55,11 +55,14 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
     setGlobalAdapter(adapter)
   }
 
+  //deploy
   deterministicDeploymentAddress = deterministicDeploymentAddress
 
+  //interaction
   normalizeInteraction = normalizeInteraction
   normalizeInteractions = normalizeInteractions
 
+  //order
   timestamp = timestamp
   hashify = hashify
   normalizeBuyTokenBalance = normalizeBuyTokenBalance
@@ -70,19 +73,23 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   packOrderUidParams = packOrderUidParams
   extractOrderUidParams = extractOrderUidParams
 
+  //proxy
   implementationAddress = implementationAddress
   ownerAddress = ownerAddress
   proxyInterface = proxyInterface
 
+  //sign
   signOrder = signOrder
   encodeEip1271SignatureData = encodeEip1271SignatureData
   decodeEip1271SignatureData = decodeEip1271SignatureData
   EIP1271_MAGICVALUE = EIP1271_MAGICVALUE
   SigningScheme = SigningScheme
 
+  //vault
   grantRequiredRoles = grantRequiredRoles
   VAULT_INTERFACE = VAULT_INTERFACE
 
+  //settlement
   encodeSigningScheme = encodeSigningScheme
   decodeSigningScheme = decodeSigningScheme
   encodeOrderFlags = encodeOrderFlags
@@ -98,6 +105,7 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   InteractionStage = InteractionStage
   FLAG_MASKS = FLAG_MASKS
 
+  //swap
   encodeSwapStep = encodeSwapStep
   SwapEncoder = SwapEncoder
 
