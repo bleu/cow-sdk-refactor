@@ -66,8 +66,8 @@ export class EthersV5Utils implements AdapterUtils {
     return ethers.utils.defaultAbiCoder.encode(types, values)
   }
 
-  decodeAbi(types: string[], data: BytesLike) {
-    return ethers.utils.defaultAbiCoder.decode(types, data)
+  decodeAbi(types: string[], data: BytesLike): unknown[] {
+    return ethers.utils.defaultAbiCoder.decode(types, data) as unknown[]
   }
 
   id(text: string): BytesLike {

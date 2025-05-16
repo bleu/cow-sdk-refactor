@@ -14,6 +14,7 @@ import {
 } from './order'
 import { deterministicDeploymentAddress } from './deploy'
 import { normalizeInteraction, normalizeInteractions } from './interaction'
+import { implementationAddress, ownerAddress, proxyInterface } from './proxy'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   // Make ORDER_TYPE_FIELDS and ORDER_UID_LENGTH available
@@ -43,6 +44,10 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   computeOrderUid = computeOrderUid
   packOrderUidParams = packOrderUidParams
   extractOrderUidParams = extractOrderUidParams
+
+  implementationAddress = implementationAddress
+  ownerAddress = ownerAddress
+  proxyInterface = proxyInterface
 
   /**
    * Return the Gnosis Protocol v2 domain used for signing.

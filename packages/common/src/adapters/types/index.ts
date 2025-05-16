@@ -14,7 +14,10 @@ export type TypedDataDomain = unknown
 
 export type TypedDataTypes = unknown
 
-export type Provider = unknown
+export interface Provider {
+  // eslint-disable-next-line
+  getStorageAt: (...args: any[]) => unknown
+}
 
 export type Signer = unknown
 
