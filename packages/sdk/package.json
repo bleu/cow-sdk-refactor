@@ -13,13 +13,13 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts --format esm,cjs --watch --dts",
     "lint": "eslint src/**/*.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.17.31",
     "ts-node": "^10.8.2",
     "tsup": "^7.2.0",
@@ -29,7 +29,8 @@
     "@cowprotocol/common": "workspace:*",
     "@cowprotocol/config": "workspace:*",
     "@cowprotocol/cow-app-data": "workspace:*",
-    "@cowprotocol/cow-order-book": "workspace:*"
+    "@cowprotocol/cow-order-book": "workspace:*",
+    "@cowprotocol/sdk-subgraph": "workspace:*"
   },
   "peerDependencies": {
     "cross-fetch": "^3.x",

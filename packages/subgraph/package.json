@@ -1,5 +1,5 @@
 {
-  "name": "@cowprotocol/subgraph",
+  "name": "@cowprotocol/sdk-subgraph",
   "version": "0.1.0",
   "description": "CowProtocol subgraph",
   "type": "module",
