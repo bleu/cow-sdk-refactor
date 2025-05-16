@@ -1,17 +1,23 @@
-import { AbstractProviderAdapter, AdapterTypes } from '@cowprotocol/common'
+import {
+  AbstractProviderAdapter,
+  BigIntish,
+  Bytes,
+  setGlobalAdapter,
+  Signer,
+  TypedDataDomain,
+} from '@cowprotocol/common'
 import { Order, OrderKind } from './order'
-import { TokenRegistry, Trade } from './settlement'
-import { Signature, EcdsaSigningScheme } from './sign'
-import { ContractsTs } from './ContractsTs'
+import { TokenRegistry, Trade, encodeTrade } from './settlement'
+import { EcdsaSigningScheme, Signature, signOrder } from './sign'
 
 /**
  * A Balancer swap used for settling a single order against Balancer pools.
  */
-export interface Swap<T extends AdapterTypes> {
+export interface Swap {
   /**
    * The ID of the pool for the swap.
    */
-  poolId: T['Bytes']
+  poolId: Bytes
   /**
    * The swap input token address.
    */
@@ -24,25 +30,25 @@ export interface Swap<T extends AdapterTypes> {
    * The amount to swap. This will ether be a fixed input amount when swapping
    * a sell order, or a fixed output amount when swapping a buy order.
    */
-  amount: T['BigIntish']
+  amount: BigIntish
   /**
    * Optional additional pool user data required for the swap.
    *
    * This additional user data is pool implementation specific, and allows pools
    * to extend the Vault pool interface.
    */
-  userData?: T['Bytes']
+  userData?: Bytes
 }
 
 /**
  * An encoded Balancer swap request that can be used as input to the settlement
  * contract.
  */
-export interface BatchSwapStep<T extends AdapterTypes> {
+export interface BatchSwapStep {
   /**
    * The ID of the pool for the swap.
    */
-  poolId: T['Bytes']
+  poolId: Bytes
   /**
    * The index of the input token.
    *
@@ -57,112 +63,49 @@ export interface BatchSwapStep<T extends AdapterTypes> {
   /**
    * The amount to swap.
    */
-  amount: T['BigIntish']
+  amount: BigIntish
   /**
    * Additional pool user data required for the swap.
    */
-  userData: T['Bytes']
+  userData: Bytes
 }
 
 /**
  * Swap execution parameters.
  */
-export interface SwapExecution<T extends AdapterTypes> {
+export interface SwapExecution {
   /**
    * The limit amount for the swap.
    *
    * This allows settlement submission to define a tighter slippage than what
    * was specified by the order in order to reduce MEV opportunity.
    */
-  limitAmount: T['BigIntish']
+  limitAmount: BigIntish
 }
 
 /**
  * Encoded swap parameters.
  */
-export type EncodedSwap<T extends AdapterTypes> = [
+export type EncodedSwap = [
   /** Swap requests. */
-  BatchSwapStep<T>[],
+  BatchSwapStep[],
   /** Tokens. */
   string[],
   /** Encoded trade. */
-  Trade<T>,
+  Trade,
 ]
 
-export class ContractsTs_Swap<T extends AdapterTypes = AdapterTypes> {
-  constructor(
-    private adapter: AbstractProviderAdapter<T>,
-    private contracts: ContractsTs<T>,
-  ) {}
-
-  /**
-   * Encodes a swap as a {@link BatchSwapStep} to be used with the settlement
-   * contract.
-   */
-  public encodeSwapStep(tokens: TokenRegistry<T>, swap: Swap<T>): BatchSwapStep<T> {
-    return {
-      poolId: swap.poolId,
-      assetInIndex: tokens.index(swap.assetIn),
-      assetOutIndex: tokens.index(swap.assetOut),
-      amount: swap.amount,
-      userData: swap.userData || ('0x' as T['Bytes']),
-    }
-  }
-
-  /**
-   * Static utility method for encoding a direct swap between an order and Balancer
-   * pools.
-   *
-   * @param adapter The provider adapter to use.
-   * @param contracts The contracts instance to use.
-   * @param swaps The swaps to encode.
-   * @param order The order to encode.
-   * @param signature The signature for the order.
-   * @param swapExecution Optional swap execution parameters.
-   * @returns The encoded swap.
-   */
-  public static encodeSwap<T extends AdapterTypes>(
-    adapter: AbstractProviderAdapter<T>,
-    contracts: ContractsTs<T>,
-    swaps: Swap<T>[],
-    order: Order<T>,
-    signature: Signature<T>,
-    swapExecution?: Partial<SwapExecution<T>>,
-  ): EncodedSwap<T> {
-    const encoder = new SwapEncoder<T>({} as T['TypedDataDomain'], adapter, contracts)
-    encoder.encodeSwapStep(...swaps)
-    encoder.encodeTrade(order, signature, swapExecution)
-    return encoder.encodedSwap()
-  }
-
-  /**
-   * Static utility method for encoding a direct swap between an order and Balancer
-   * pools, signing the order in the process.
-   *
-   * @param adapter The provider adapter to use.
-   * @param contracts The contracts instance to use.
-   * @param domain The domain to use for signing.
-   * @param swaps The swaps to encode.
-   * @param order The order to encode.
-   * @param owner The owner that should sign the order.
-   * @param scheme The signing scheme to use.
-   * @param swapExecution Optional swap execution parameters.
-   * @returns A promise that resolves to the encoded swap.
-   */
-  public static async encodeSwapWithSigning<T extends AdapterTypes>(
-    adapter: AbstractProviderAdapter<T>,
-    contracts: ContractsTs<T>,
-    domain: T['TypedDataDomain'],
-    swaps: Swap<T>[],
-    order: Order<T>,
-    owner: T['Signer'],
-    scheme: EcdsaSigningScheme,
-    swapExecution?: Partial<SwapExecution<T>>,
-  ): Promise<EncodedSwap<T>> {
-    const encoder = new SwapEncoder<T>(domain, adapter, contracts)
-    encoder.encodeSwapStep(...swaps)
-    await encoder.signEncodeTrade(order, owner, scheme, swapExecution)
-    return encoder.encodedSwap()
+/**
+ * Encodes a swap as a {@link BatchSwapStep} to be used with the settlement
+ * contract.
+ */
+export function encodeSwapStep(tokens: TokenRegistry, swap: Swap): BatchSwapStep {
+  return {
+    poolId: swap.poolId,
+    assetInIndex: tokens.index(swap.assetIn),
+    assetOutIndex: tokens.index(swap.assetOut),
+    amount: swap.amount,
+    userData: swap.userData || '0x',
   }
 }
 
@@ -173,11 +116,10 @@ export class ContractsTs_Swap<T extends AdapterTypes = AdapterTypes> {
  * necessary computation in order to map each token addresses to IDs to
  * properly encode swap requests and the trade.
  */
-export class SwapEncoder<T extends AdapterTypes> {
-  private readonly _tokens: TokenRegistry<T>
-  private readonly _swaps: BatchSwapStep<T>[] = []
-  private _trade: Trade<T> | undefined = undefined
-  private swap: ContractsTs_Swap<T>
+export class SwapEncoder {
+  private readonly _tokens = new TokenRegistry()
+  private readonly _swaps: BatchSwapStep[] = []
+  private _trade: Trade | undefined = undefined
 
   /**
    * Creates a new settlement encoder instance.
@@ -186,12 +128,10 @@ export class SwapEncoder<T extends AdapterTypes> {
    * more details.
    */
   public constructor(
-    public readonly domain: T['TypedDataDomain'],
-    private adapter: AbstractProviderAdapter<T>,
-    private contracts: ContractsTs<T>,
+    public readonly domain: TypedDataDomain,
+    adapter?: AbstractProviderAdapter,
   ) {
-    this._tokens = new TokenRegistry<T>(adapter)
-    this.swap = new ContractsTs_Swap<T>(adapter, contracts)
+    if (adapter) setGlobalAdapter(adapter)
   }
 
   /**
@@ -206,14 +146,14 @@ export class SwapEncoder<T extends AdapterTypes> {
   /**
    * Gets the encoded swaps.
    */
-  public get swaps(): BatchSwapStep<T>[] {
+  public get swaps(): BatchSwapStep[] {
     return this._swaps.slice()
   }
 
   /**
    * Gets the encoded trade.
    */
-  public get trade(): Trade<T> {
+  public get trade(): Trade {
     if (this._trade === undefined) {
       throw new Error('trade not encoded')
     }
@@ -226,8 +166,8 @@ export class SwapEncoder<T extends AdapterTypes> {
    *
    * @param swap The Balancer swap to encode.
    */
-  public encodeSwapStep(...swaps: Swap<T>[]): void {
-    this._swaps.push(...swaps.map((swap) => this.swap.encodeSwapStep(this._tokens, swap)))
+  public encodeSwapStep(...swaps: Swap[]): void {
+    this._swaps.push(...swaps.map((swap) => encodeSwapStep(this._tokens, swap)))
   }
 
   /**
@@ -239,18 +179,15 @@ export class SwapEncoder<T extends AdapterTypes> {
    * @param order The order of the trade to encode.
    * @param signature The signature for the order data.
    */
-  public encodeTrade(order: Order<T>, signature: Signature<T>, swapExecution?: Partial<SwapExecution<T>>): void {
+  public encodeTrade(order: Order, signature: Signature, swapExecution?: Partial<SwapExecution>): void {
     const { limitAmount } = {
       limitAmount: order.kind == OrderKind.SELL ? order.buyAmount : order.sellAmount,
       ...swapExecution,
     }
 
-    const settlement = this.contracts.createSettlementEncoder(this.domain)
-    settlement.encodeTrade(order, signature, {
+    this._trade = encodeTrade(this._tokens, order, signature, {
       executedAmount: limitAmount,
     })
-
-    this._trade = settlement.trades[0]
   }
 
   /**
@@ -262,12 +199,12 @@ export class SwapEncoder<T extends AdapterTypes> {
    * details.
    */
   public async signEncodeTrade(
-    order: Order<T>,
-    owner: T['Signer'],
+    order: Order,
+    owner: Signer,
     scheme: EcdsaSigningScheme,
-    swapExecution?: Partial<SwapExecution<T>>,
+    swapExecution?: Partial<SwapExecution>,
   ): Promise<void> {
-    const signature = await this.contracts.signOrder(this.domain, order, owner, scheme)
+    const signature = await signOrder(this.domain, order, owner, scheme)
     this.encodeTrade(order, signature, swapExecution)
   }
 
@@ -276,7 +213,73 @@ export class SwapEncoder<T extends AdapterTypes> {
    *
    * This method with raise an exception if a trade has not been encoded.
    */
-  public encodedSwap(): EncodedSwap<T> {
+  public encodedSwap(): EncodedSwap {
     return [this.swaps, this.tokens, this.trade]
+  }
+
+  public static encodeSwap(swaps: Swap[], order: Order, signature: Signature): EncodedSwap
+  public static encodeSwap(
+    swaps: Swap[],
+    order: Order,
+    signature: Signature,
+    swapExecution: Partial<SwapExecution> | undefined,
+  ): EncodedSwap
+
+  public static encodeSwap(
+    domain: TypedDataDomain,
+    swaps: Swap[],
+    order: Order,
+    owner: Signer,
+    scheme: EcdsaSigningScheme,
+  ): Promise<EncodedSwap>
+  public static encodeSwap(
+    domain: TypedDataDomain,
+    swaps: Swap[],
+    order: Order,
+    owner: Signer,
+    scheme: EcdsaSigningScheme,
+    swapExecution: Partial<SwapExecution> | undefined,
+  ): Promise<EncodedSwap>
+
+  /**
+   * Utility method for encoding a direct swap between an order and Balancer
+   * pools.
+   *
+   * This method functions identically to using a {@link SwapEncoder} and is
+   * provided as a short-cut.
+   */
+  public static encodeSwap(
+    ...args:
+      | [Swap[], Order, Signature]
+      | [Swap[], Order, Signature, Partial<SwapExecution> | undefined]
+      | [TypedDataDomain, Swap[], Order, Signer, EcdsaSigningScheme]
+      | [TypedDataDomain, Swap[], Order, Signer, EcdsaSigningScheme, Partial<SwapExecution> | undefined]
+  ): EncodedSwap | Promise<EncodedSwap> {
+    if (args.length < 5) {
+      const [swaps, order, signature, swapExecution] = args as unknown as [
+        Swap[],
+        Order,
+        Signature,
+        Partial<SwapExecution> | undefined,
+      ]
+
+      const encoder = new SwapEncoder({})
+      encoder.encodeSwapStep(...swaps)
+      encoder.encodeTrade(order, signature, swapExecution)
+      return encoder.encodedSwap()
+    } else {
+      const [domain, swaps, order, owner, scheme, swapExecution] = args as unknown as [
+        TypedDataDomain,
+        Swap[],
+        Order,
+        Signer,
+        EcdsaSigningScheme,
+        Partial<SwapExecution> | undefined,
+      ]
+
+      const encoder = new SwapEncoder(domain)
+      encoder.encodeSwapStep(...swaps)
+      return encoder.signEncodeTrade(order, owner, scheme, swapExecution).then(() => encoder.encodedSwap())
+    }
   }
 }

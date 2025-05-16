@@ -39,6 +39,7 @@ import {
   InteractionStage,
   FLAG_MASKS,
 } from './settlement'
+import { encodeSwapStep, SwapEncoder } from './swap'
 
 export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   // Make ORDER_TYPE_FIELDS and ORDER_UID_LENGTH available
@@ -96,6 +97,9 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
   SettlementEncoder = SettlementEncoder
   InteractionStage = InteractionStage
   FLAG_MASKS = FLAG_MASKS
+
+  encodeSwapStep = encodeSwapStep
+  SwapEncoder = SwapEncoder
 
   /**
    * Return the Gnosis Protocol v2 domain used for signing.
