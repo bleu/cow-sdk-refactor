@@ -27,7 +27,9 @@
   },
   "dependencies": {
     "@cowprotocol/common": "workspace:*",
-    "@cowprotocol/cow-app-data": "workspace:*"
+    "@cowprotocol/config": "workspace:*",
+    "@cowprotocol/cow-app-data": "workspace:*",
+    "@cowprotocol/cow-order-book": "workspace:*"
   },
   "peerDependencies": {
     "cross-fetch": "^3.x",

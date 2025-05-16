@@ -124,15 +124,9 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.8.2
-      vitest:
-        specifier: ^0.34.3
-        version: 0.34.6
 
   packages/config:
     dependencies:
-      '@cowprotocol/common':
-        specifier: workspace:*
-        version: link:../common
       exponential-backoff:
         specifier: ^3.1.1
         version: 3.1.2
@@ -141,7 +135,7 @@ importers:
         version: 2.1.0
     devDependencies:
       '@types/node':
-        specifier: ^20.5.2
+        specifier: ^20.17.31
         version: 20.17.47
       eslint:
         specifier: ^8.48.0
@@ -152,9 +146,6 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.8.2
-      vitest:
-        specifier: ^0.34.3
-        version: 0.34.6
 
   packages/contracts-ts:
     dependencies:
@@ -235,6 +226,64 @@ importers:
       json-schema-to-typescript:
         specifier: ^10.1.5
         version: 10.1.5
+      ts-jest:
+        specifier: ^29.0.0
+        version: 29.3.3(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.19.12)(jest@29.7.0(@types/node@20.17.47)(ts-node@10.9.2(@types/node@20.17.47)(typescript@5.8.2)))(typescript@5.8.2)
+      tsup:
+        specifier: ^7.2.0
+        version: 7.3.0(postcss@8.5.3)(ts-node@10.9.2(@types/node@20.17.47)(typescript@5.8.2))(typescript@5.8.2)
+      tsx:
+        specifier: ^4.19.4
+        version: 4.19.4
+      typescript:
+        specifier: ^5.2.2
+        version: 5.8.2
+
+  packages/cow-order-book:
+    dependencies:
+      '@cowprotocol/common':
+        specifier: workspace:*
+        version: link:../common
+      '@cowprotocol/config':
+        specifier: workspace:*
+        version: link:../config
+      cross-fetch:
+        specifier: ^3.2.0
+        version: 3.2.0
+      exponential-backoff:
+        specifier: ^3.1.2
+        version: 3.1.2
+      limiter:
+        specifier: ^3.0.0
+        version: 3.0.0
+    devDependencies:
+      '@babel/core':
+        specifier: 7.27.1
+        version: 7.27.1
+      '@babel/preset-env':
+        specifier: 7.27.2
+        version: 7.27.2(@babel/core@7.27.1)
+      '@babel/preset-typescript':
+        specifier: 7.27.1
+        version: 7.27.1(@babel/core@7.27.1)
+      '@types/jest':
+        specifier: ^29.4.0
+        version: 29.5.14
+      '@types/node':
+        specifier: ^20.17.31
+        version: 20.17.47
+      '@types/semver-sort':
+        specifier: ^0.0.1
+        version: 0.0.1
+      babel-jest:
+        specifier: 29.7.0
+        version: 29.7.0(@babel/core@7.27.1)
+      jest:
+        specifier: ^29.4.2
+        version: 29.7.0(@types/node@20.17.47)(ts-node@10.9.2(@types/node@20.17.47)(typescript@5.8.2))
+      jest-fetch-mock:
+        specifier: ^3.0.3
+        version: 3.0.3
       ts-jest:
         specifier: ^29.0.0
         version: 29.3.3(@babel/core@7.27.1)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.27.1))(esbuild@0.19.12)(jest@29.7.0(@types/node@20.17.47)(ts-node@10.9.2(@types/node@20.17.47)(typescript@5.8.2)))(typescript@5.8.2)
@@ -376,9 +425,15 @@ importers:
       '@cowprotocol/common':
         specifier: workspace:*
         version: link:../common
+      '@cowprotocol/config':
+        specifier: workspace:*
+        version: link:../config
       '@cowprotocol/cow-app-data':
         specifier: workspace:*
         version: link:../cow-app-data
+      '@cowprotocol/cow-order-book':
+        specifier: workspace:*
+        version: link:../cow-order-book
       cross-fetch:
         specifier: ^3.x
         version: 3.2.0
@@ -4080,6 +4135,9 @@ packages:
   limiter@2.1.0:
     resolution: {integrity: sha512-361TYz6iay6n+9KvUUImqdLuFigK+K79qrUtBsXhJTLdH4rIt/r1y8r1iozwh8KbZNpujbFTSh74mJ7bwbAMOw==}
 
+  limiter@3.0.0:
+    resolution: {integrity: sha512-hev7DuXojsTFl2YwyzUJMDnZ/qBDd3yZQLSH3aD4tdL1cqfc3TMnoecEJtWFaQFdErZsKoFMBTxF/FBSkgDbEg==}
+
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
@@ -7624,7 +7682,7 @@ snapshots:
   '@types/glob@7.2.0':
     dependencies:
       '@types/minimatch': 5.1.2
-      '@types/node': 22.15.18
+      '@types/node': 20.17.47
 
   '@types/glob@8.1.0':
     dependencies:
@@ -7695,7 +7753,7 @@ snapshots:
 
   '@types/through@0.0.33':
     dependencies:
-      '@types/node': 22.15.18
+      '@types/node': 20.17.47
 
   '@types/tinycolor2@1.4.6': {}
 
@@ -10277,6 +10335,8 @@ snapshots:
   limiter@2.1.0:
     dependencies:
       just-performance: 4.3.0
+
+  limiter@3.0.0: {}
 
   lines-and-columns@1.2.4: {}
 
