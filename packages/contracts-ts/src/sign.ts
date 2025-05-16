@@ -1,5 +1,5 @@
 import { Bytes, getGlobalAdapter, SignatureLike, Signer, TypedDataDomain, TypedDataTypes } from '@cowprotocol/common'
-import { ORDER_TYPE_FIELDS, Order, normalizeOrder, hashTypedData } from './order'
+import { ORDER_TYPE_FIELDS, Order, normalizeOrder } from './order'
 
 /**
  * Value returned by a call to `isValidSignature` if the signature was verified

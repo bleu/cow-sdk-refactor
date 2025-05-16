@@ -16,7 +16,8 @@ export type TypedDataTypes = unknown
 
 export interface Provider {
   // eslint-disable-next-line
-  getStorageAt: (...args: any[]) => unknown
+  getStorageAt?: (...args: any[]) => unknown
+  getStorage?: (...args: any[]) => unknown
 }
 
 export type Signer = unknown

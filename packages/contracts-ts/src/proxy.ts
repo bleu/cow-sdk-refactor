@@ -41,10 +41,13 @@ export async function implementationAddress(provider: Provider, proxy: string): 
  * @returns The address of the administrator of the proxy.
  */
 export async function ownerAddress(provider: Provider, proxy: string): Promise<string> {
-  const [owner] = getGlobalAdapter().utils.decodeAbi(
-    ['address'],
-    await provider.getStorageAt(proxy, OWNER_STORAGE_SLOT),
-  )
+  const data = provider?.getStorageAt
+    ? await provider.getStorageAt(proxy, OWNER_STORAGE_SLOT)
+    : provider?.getStorage
+      ? provider.getStorage(proxy, OWNER_STORAGE_SLOT)
+      : null
+  if (data === null) throw new Error('getStorage is not implemented')
+  const [owner] = getGlobalAdapter().utils.decodeAbi(['address'], data)
   return owner as string
 }
 
