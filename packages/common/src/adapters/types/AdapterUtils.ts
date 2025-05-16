@@ -1,4 +1,4 @@
-import { Bytes, Abi, TypedDataDomain, BigIntish, SignatureLike, ContractInterface } from '.'
+import { Bytes, Abi, TypedDataDomain, BigIntish, SignatureLike, ContractInterface, TypedDataTypes } from '.'
 
 /**
  * Abstract class defining the interface for adapter utilities
@@ -58,11 +58,7 @@ export abstract class AdapterUtils {
   /**
    * Hashes EIP-712 typed data
    */
-  abstract hashTypedData(
-    domain: TypedDataDomain,
-    types: Record<string, unknown[]>,
-    data: Record<string, unknown>,
-  ): string
+  abstract hashTypedData(domain: TypedDataDomain, types: TypedDataTypes, data: Record<string, unknown>): string
 
   /**
    * Returns the checksum address of an Ethereum address

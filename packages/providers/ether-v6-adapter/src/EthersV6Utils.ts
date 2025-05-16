@@ -28,7 +28,6 @@ import {
   solidityPackedKeccak256,
 } from 'ethers'
 import { TypedDataDomain } from 'ethers'
-import { DeploymentArguments } from '@cowprotocol/contracts-ts'
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 
@@ -37,7 +36,7 @@ export class EthersV6Utils implements AdapterUtils {
     return toUtf8Bytes(text)
   }
 
-  encodeDeploy<C>(encodeDeployArgs: DeploymentArguments<C>, abi: Abi): string {
+  encodeDeploy(encodeDeployArgs: unknown[], abi: Abi): string {
     const abiCoder = new AbiCoder()
     const contractInterface = new Interface(abi)
 

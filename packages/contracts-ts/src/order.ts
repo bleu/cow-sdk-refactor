@@ -1,9 +1,9 @@
-import { AbstractProviderAdapter, AdapterTypes } from '@cowprotocol/common'
+import { BigIntish, Bytes, getGlobalAdapter, TypedDataDomain, TypedDataTypes } from '@cowprotocol/common'
 
 /**
  * Gnosis Protocol v2 order data.
  */
-export interface Order<T extends AdapterTypes> {
+export interface Order {
   /**
    * Sell token address.
    */
@@ -25,7 +25,7 @@ export interface Order<T extends AdapterTypes> {
    * amount represents the maximum sell amount that can be executed. For partial
    * fill orders, this represents a component of the limit price fraction.
    */
-  sellAmount: T['BigIntish']
+  sellAmount: BigIntish
   /**
    * The order buy amount.
    *
@@ -34,7 +34,7 @@ export interface Order<T extends AdapterTypes> {
    * represents the exact buy amount that will be executed. For partial fill
    * orders, this represents a component of the limit price fraction.
    */
-  buyAmount: T['BigIntish']
+  buyAmount: BigIntish
   /**
    * The timestamp this order is valid until
    */
@@ -44,11 +44,11 @@ export interface Order<T extends AdapterTypes> {
    * also be used to ensure uniqueness between two orders with otherwise the
    * exact same parameters.
    */
-  appData: HashLike<T>
+  appData: HashLike
   /**
    * Fee to give to the protocol.
    */
-  feeAmount: T['BigIntish']
+  feeAmount: BigIntish
   /**
    * The order kind.
    */
@@ -73,11 +73,11 @@ export interface Order<T extends AdapterTypes> {
 /**
  * Gnosis Protocol v2 order cancellation data.
  */
-export interface OrderCancellations<T extends AdapterTypes> {
+export interface OrderCancellations {
   /**
    * The unique identifier of the order to be cancelled.
    */
-  orderUids: T['Bytes'][]
+  orderUids: Bytes[]
 }
 
 /**
@@ -92,10 +92,7 @@ export const BUY_ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
 /**
  * Gnosis Protocol v2 order flags.
  */
-export type OrderFlags<T extends AdapterTypes> = Pick<
-  Order<T>,
-  'kind' | 'partiallyFillable' | 'sellTokenBalance' | 'buyTokenBalance'
->
+export type OrderFlags = Pick<Order, 'kind' | 'partiallyFillable' | 'sellTokenBalance' | 'buyTokenBalance'>
 
 /**
  * A timestamp value.
@@ -105,7 +102,7 @@ export type Timestamp = number | Date
 /**
  * A hash-like app data value.
  */
-export type HashLike<T extends AdapterTypes> = T['Bytes'] | number
+export type HashLike = Bytes | number
 
 /**
  * Order kind.
@@ -171,6 +168,15 @@ export function timestamp(t: Timestamp): number {
 }
 
 /**
+ * Normalizes an app data value to a 32-byte hash.
+ * @param hashLike A hash-like value to normalize.
+ * @returns A 32-byte hash encoded as a hex-string.
+ */
+export function hashify(h: HashLike): string {
+  return typeof h === 'number' ? `0x${h.toString(16).padStart(64, '0')}` : getGlobalAdapter().utils.hexZeroPad(h, 32)
+}
+
+/**
  * Normalizes the balance configuration for a buy token. Specifically, this
  * function ensures that {@link OrderBalance.EXTERNAL} gets normalized to
  * {@link OrderBalance.ERC20}.
@@ -196,16 +202,58 @@ export function normalizeBuyTokenBalance(
 /**
  * Normalized representation of an {@link Order} for EIP-712 operations.
  */
-export type NormalizedOrder<T extends AdapterTypes> = Omit<
-  Order<T>,
-  'validTo' | 'appData' | 'kind' | 'sellTokenBalance' | 'buyTokenBalance'
-> & {
+export type NormalizedOrder = Omit<Order, 'validTo' | 'appData' | 'kind' | 'sellTokenBalance' | 'buyTokenBalance'> & {
   receiver: string
   validTo: number
   appData: string
   kind: 'sell' | 'buy'
   sellTokenBalance: 'erc20' | 'external' | 'internal'
   buyTokenBalance: 'erc20' | 'internal'
+}
+
+/**
+ * Normalizes an order for hashing and signing, so that it can be used with
+ * Ethers.js for EIP-712 operations.
+ * @param hashLike A hash-like value to normalize.
+ * @returns A 32-byte hash encoded as a hex-string.
+ */
+export function normalizeOrder(order: Order): NormalizedOrder {
+  const adapter = getGlobalAdapter()
+  if (order.receiver === adapter.ZERO_ADDRESS) {
+    throw new Error('receiver cannot be address(0)')
+  }
+
+  const normalizedOrder = {
+    ...order,
+    sellTokenBalance: order.sellTokenBalance ?? OrderBalance.ERC20,
+    receiver: order.receiver ?? adapter.ZERO_ADDRESS,
+    validTo: timestamp(order.validTo),
+    appData: hashify(order.appData),
+    buyTokenBalance: normalizeBuyTokenBalance(order.buyTokenBalance),
+  }
+  return normalizedOrder
+}
+
+/**
+ * Compute the 32-byte signing hash for the specified order.
+ *
+ * @param domain The EIP-712 domain separator to compute the hash for.
+ * @param types The order to compute the digest for.
+ * @return Hex-encoded 32-byte order digest.
+ */
+export function hashTypedData(domain: TypedDataDomain, types: TypedDataTypes, data: Record<string, unknown>): string {
+  return getGlobalAdapter().utils.hashTypedData(domain, types, data)
+}
+
+/**
+ * Compute the 32-byte signing hash for the specified order.
+ *
+ * @param domain The EIP-712 domain separator to compute the hash for.
+ * @param order The order to compute the digest for.
+ * @return Hex-encoded 32-byte order digest.
+ */
+export function hashOrder(domain: TypedDataDomain, order: Order): string {
+  return hashTypedData(domain, { Order: ORDER_TYPE_FIELDS }, normalizeOrder(order))
 }
 
 /**
@@ -231,129 +279,49 @@ export interface OrderUidParams {
   validTo: number | Date
 }
 
-export class ContractsTs_Order<T extends AdapterTypes = AdapterTypes> {
-  constructor(private adapter: AbstractProviderAdapter<T>) {
-    this.adapter = adapter
+/**
+ * Computes the order UID for an order and the given owner.
+ */
+export function computeOrderUid(domain: TypedDataDomain, order: Order, owner: string): string {
+  return packOrderUidParams({
+    orderDigest: hashOrder(domain, order),
+    owner,
+    validTo: order.validTo,
+  })
+}
+
+/**
+ * Compute the unique identifier describing a user order in the settlement
+ * contract.
+ *
+ * @param OrderUidParams The parameters used for computing the order's unique
+ * identifier.
+ * @returns A string that unequivocally identifies the order of the user.
+ */
+export function packOrderUidParams({ orderDigest, owner, validTo }: OrderUidParams): string {
+  return getGlobalAdapter().utils.solidityPack(
+    ['bytes32', 'address', 'uint32'],
+    [orderDigest, owner, timestamp(validTo)],
+  )
+}
+
+/**
+ * Extracts the order unique identifier parameters from the specified bytes.
+ *
+ * @param orderUid The order UID encoded as a hexadecimal string.
+ * @returns The extracted order UID parameters.
+ */
+export function extractOrderUidParams(orderUid: string): OrderUidParams {
+  const adapter = getGlobalAdapter()
+  const bytes = adapter.utils.arrayify(orderUid)
+  if (bytes.length != ORDER_UID_LENGTH) {
+    throw new Error('invalid order UID length')
   }
 
-  /**
-   * Normalizes a timestamp value to a Unix timestamp.
-   * @param time The timestamp value to normalize.
-   * @return Unix timestamp or number of seconds since the Unix Epoch.
-   */
-  public timestamp(t: Timestamp): number {
-    return timestamp(t)
-  }
-
-  /**
-   * Normalizes an app data value to a 32-byte hash.
-   * @param hashLike A hash-like value to normalize.
-   * @returns A 32-byte hash encoded as a hex-string.
-   */
-  public hashify<T extends AdapterTypes>(h: HashLike<T>): string {
-    return typeof h === 'number' ? `0x${h.toString(16).padStart(64, '0')}` : this.adapter.hexZeroPad(h, 32)
-  }
-
-  /**
-   * Normalizes the balance configuration for a buy token. Specifically, this
-   * function ensures that {@link OrderBalance.EXTERNAL} gets normalized to
-   * {@link OrderBalance.ERC20}.
-   *
-   * @param balance The balance configuration.
-   * @returns The normalized balance configuration.
-   */
-  public normalizeBuyTokenBalance(balance: OrderBalance | undefined): OrderBalance.ERC20 | OrderBalance.INTERNAL {
-    return normalizeBuyTokenBalance(balance)
-  }
-
-  /**
-   * Normalizes an order for hashing and signing, so that it can be used with
-   * Ethers.js for EIP-712 operations.
-   * @param hashLike A hash-like value to normalize.
-   * @returns A 32-byte hash encoded as a hex-string.
-   */
-  public normalizeOrder(order: Order<T>): NormalizedOrder<T> {
-    if (order.receiver === this.adapter.ZERO_ADDRESS) {
-      throw new Error('receiver cannot be address(0)')
-    }
-
-    const normalizedOrder = {
-      ...order,
-      sellTokenBalance: order.sellTokenBalance ?? OrderBalance.ERC20,
-      receiver: order.receiver ?? this.adapter.ZERO_ADDRESS,
-      validTo: timestamp(order.validTo),
-      appData: this.hashify(order.appData),
-      buyTokenBalance: normalizeBuyTokenBalance(order.buyTokenBalance),
-    }
-    return normalizedOrder
-  }
-
-  /**
-   * Compute the 32-byte signing hash for the specified order.
-   *
-   * @param domain The EIP-712 domain separator to compute the hash for.
-   * @param types The order to compute the digest for.
-   * @return Hex-encoded 32-byte order digest.
-   */
-  public hashTypedData(
-    domain: T['TypedDataDomain'],
-    types: T['TypedDataTypes'],
-    data: Record<string, unknown>,
-  ): string {
-    return this.adapter.hashTypedData(domain, types, data)
-  }
-
-  /**
-   * Compute the 32-byte signing hash for the specified order.
-   *
-   * @param domain The EIP-712 domain separator to compute the hash for.
-   * @param order The order to compute the digest for.
-   * @return Hex-encoded 32-byte order digest.
-   */
-  public hashOrder(domain: T['TypedDataDomain'], order: Order<T>): string {
-    return this.hashTypedData(domain, { Order: ORDER_TYPE_FIELDS }, this.normalizeOrder(order))
-  }
-
-  /**
-   * Computes the order UID for an order and the given owner.
-   */
-  public computeOrderUid(domain: T['TypedDataDomain'], order: Order<T>, owner: string): string {
-    return this.packOrderUidParams({
-      orderDigest: this.hashOrder(domain, order),
-      owner,
-      validTo: order.validTo,
-    })
-  }
-
-  /**
-   * Compute the unique identifier describing a user order in the settlement
-   * contract.
-   *
-   * @param OrderUidParams The parameters used for computing the order's unique
-   * identifier.
-   * @returns A string that unequivocally identifies the order of the user.
-   */
-  public packOrderUidParams({ orderDigest, owner, validTo }: OrderUidParams): string {
-    return this.adapter.solidityPack(['bytes32', 'address', 'uint32'], [orderDigest, owner, timestamp(validTo)])
-  }
-
-  /**
-   * Extracts the order unique identifier parameters from the specified bytes.
-   *
-   * @param orderUid The order UID encoded as a hexadecimal string.
-   * @returns The extracted order UID parameters.
-   */
-  public extractOrderUidParams(orderUid: string): OrderUidParams {
-    const bytes = this.adapter.arrayify(orderUid)
-    if (bytes.length != ORDER_UID_LENGTH) {
-      throw new Error('invalid order UID length')
-    }
-
-    const view = new DataView(bytes.buffer)
-    return {
-      orderDigest: this.adapter.hexlify(bytes.subarray(0, 32)),
-      owner: this.adapter.getChecksumAddress(this.adapter.hexlify(bytes.subarray(32, 52))),
-      validTo: view.getUint32(52),
-    }
+  const view = new DataView(bytes.buffer)
+  return {
+    orderDigest: adapter.utils.hexlify(bytes.subarray(0, 32)),
+    owner: adapter.utils.getChecksumAddress(adapter.utils.hexlify(bytes.subarray(32, 52))),
+    validTo: view.getUint32(52),
   }
 }
