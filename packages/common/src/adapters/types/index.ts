@@ -18,6 +18,8 @@ export type Provider = unknown
 
 export type Signer = unknown
 
+export type SignatureLike = unknown
+
 export type AdapterTypes = {
   Abi: Abi
   Address: Address
@@ -26,6 +28,7 @@ export type AdapterTypes = {
   ContractInterface: ContractInterface
   Provider: Provider
   Signer: Signer
+  SignatureLike: SignatureLike
   TypedDataDomain: TypedDataDomain
   TypedDataTypes: TypedDataTypes
 }
