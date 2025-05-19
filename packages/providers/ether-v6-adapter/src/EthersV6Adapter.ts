@@ -1,21 +1,50 @@
-import { Provider, Signer, Contract, VoidSigner, JsonRpcSigner, Wallet, Interface, TypedDataField } from 'ethers'
+import {
+  Provider,
+  Signer,
+  Contract,
+  VoidSigner,
+  JsonRpcSigner,
+  Wallet,
+  Interface,
+  TypedDataField,
+  BytesLike,
+  BigNumberish,
+  ZeroAddress,
+} from 'ethers'
 import {
   AbstractProviderAdapter,
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
+  AdapterTypes,
 } from '@cowprotocol/common'
+import { TypedDataDomain } from 'ethers'
 
 type Abi = ConstructorParameters<typeof Interface>[0]
-import { TypedDataDomain } from 'ethers'
+
+interface EthersV6Types extends AdapterTypes {
+  Abi: Abi
+  Address: string
+  Bytes: BytesLike
+  BigIntish: BigNumberish
+  ContractInterface: Interface
+  Provider: Provider
+  Signer: Signer
+  TypedDataDomain: TypedDataDomain
+  TypedDataTypes: Record<string, TypedDataField[]>
+}
 import { EthersV6Utils } from './EthersV6Utils'
 
-export class EthersV6Adapter implements AbstractProviderAdapter {
+export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
+  declare protected _type?: EthersV6Types
+
   private provider: Provider
   private signer: Signer
   public utils: EthersV6Utils
 
   constructor(providerOrSigner: Provider | Signer) {
+    super()
+    this.ZERO_ADDRESS = ZeroAddress
     if (
       providerOrSigner instanceof JsonRpcSigner ||
       providerOrSigner instanceof VoidSigner ||
@@ -119,5 +148,9 @@ export class EthersV6Adapter implements AbstractProviderAdapter {
 
   getContract(address: string, abi: Abi): Contract {
     return new Contract(address, abi, this.signer)
+  }
+
+  async getStorageAt(address: string, slot: BigNumberish): Promise<BytesLike> {
+    return this.provider.getStorage(address, slot)
   }
 }

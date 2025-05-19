@@ -1,16 +1,33 @@
-import { ethers } from 'ethers'
+import { BigNumberish, BytesLike, ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
-import { AbstractProviderAdapter, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { AbstractProviderAdapter, AdapterTypes, TransactionParams, TransactionResponse } from '@cowprotocol/common'
 import { EthersV5Utils } from './EthersV5Utils'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
+type Interface = ethers.utils.Interface
 
-export class EthersV5Adapter implements AbstractProviderAdapter {
+interface EthersV5Types extends AdapterTypes {
+  Abi: Abi
+  Address: string
+  Bytes: BytesLike
+  BigIntish: BigNumberish
+  ContractInterface: Interface
+  Provider: ethers.providers.Provider
+  Signer: ethers.Signer
+  TypedDataDomain: TypedDataDomain
+  TypedDataTypes: Record<string, TypedDataField[]>
+}
+
+export class EthersV5Adapter extends AbstractProviderAdapter<EthersV5Types> {
+  declare protected _type?: EthersV5Types
+
   private provider: ethers.providers.Provider
   private signer: ethers.Signer & TypedDataSigner
   public utils: EthersV5Utils
 
   constructor(providerOrSigner: ethers.providers.Provider | ethers.Signer) {
+    super()
+    this.ZERO_ADDRESS = ethers.constants.AddressZero
     if (ethers.Signer.isSigner(providerOrSigner)) {
       this.signer = providerOrSigner as ethers.Signer & TypedDataSigner
       this.provider = providerOrSigner.provider as ethers.providers.Provider
@@ -114,5 +131,9 @@ export class EthersV5Adapter implements AbstractProviderAdapter {
 
   getContract(address: string, abi: Abi): unknown {
     return new ethers.Contract(address, abi, this.signer)
+  }
+
+  async getStorageAt(address: string, slot: BigNumberish): Promise<BytesLike> {
+    return this.provider.getStorageAt(address, slot)
   }
 }
