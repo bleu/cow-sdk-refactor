@@ -1,5 +1,5 @@
 {
-  "name": "@cowprotocol/cow-order-book",
+  "name": "@cowprotocol/sdk-order-book",
   "version": "0.1.0",
   "description": "CowProtocol Order Book",
   "type": "module",
@@ -33,11 +33,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@cowprotocol/config": "workspace:*",
-    "@cowprotocol/common": "workspace:*",
+    "@cowprotocol/sdk-config": "workspace:*",
+    "@cowprotocol/sdk-common": "workspace:*",
     "cross-fetch": "^3.2.0",
     "exponential-backoff": "^3.1.2",
     "limiter": "^3.0.0"
-  },
-  "peerDependencies": {}
+  }
 }

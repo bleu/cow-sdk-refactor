@@ -1,5 +1,5 @@
-import { AbstractProviderAdapter } from '@cowprotocol/common'
-import { CowEnv, PartialApiContext, SupportedChainId } from '@cowprotocol/config'
+import { AbstractProviderAdapter } from '@cowprotocol/sdk-common'
+import { CowEnv, PartialApiContext, SupportedChainId } from '@cowprotocol/sdk-config'
 
 /**
  * Optional configuration options for the CowSdk

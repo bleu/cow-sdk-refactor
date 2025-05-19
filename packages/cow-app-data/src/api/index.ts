@@ -1,4 +1,4 @@
-import { AbstractProviderAdapter, setGlobalAdapter } from '@cowprotocol/common'
+import { AbstractProviderAdapter, setGlobalAdapter } from '@cowprotocol/sdk-common'
 import { appDataHexToCid, appDataHexToCidLegacy } from './appDataHexToCid'
 import { cidToAppDataHex } from './cidToAppDataHex'
 import { fetchDocFromAppDataHex, fetchDocFromAppDataHexLegacy } from './fetchDocFromAppData'

@@ -16,12 +16,12 @@ import {
 } from 'viem'
 
 import {
+  AdapterTypes,
   AbstractProviderAdapter,
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
-  AdapterTypes,
-} from '@cowprotocol/common'
+} from '@cowprotocol/sdk-common'
 
 interface ViemTypes extends AdapterTypes {
   Abi: Abi

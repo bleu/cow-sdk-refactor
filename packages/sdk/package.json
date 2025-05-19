@@ -26,10 +26,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@cowprotocol/common": "workspace:*",
-    "@cowprotocol/config": "workspace:*",
-    "@cowprotocol/cow-app-data": "workspace:*",
-    "@cowprotocol/cow-order-book": "workspace:*",
+    "@cowprotocol/sdk-common": "workspace:*",
+    "@cowprotocol/sdk-config": "workspace:*",
+    "@cowprotocol/sdk-app-data": "workspace:*",
+    "@cowprotocol/sdk-order-book": "workspace:*",
     "@cowprotocol/sdk-subgraph": "workspace:*"
   },
   "peerDependencies": {

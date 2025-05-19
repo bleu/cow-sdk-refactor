@@ -1,7 +1,7 @@
 import { Variables, request } from 'graphql-request'
 import { DocumentNode } from 'graphql/index'
-import { SupportedChainId, ApiContext, CowEnv, DEFAULT_COW_API_CONTEXT } from '@cowprotocol/config'
-import { CowError } from '@cowprotocol/common'
+import { SupportedChainId, ApiContext, CowEnv, DEFAULT_COW_API_CONTEXT } from '@cowprotocol/sdk-config'
+import { CowError } from '@cowprotocol/sdk-common'
 import { LastDaysVolumeQuery, LastHoursVolumeQuery, TotalsQuery } from './graphql'
 import { LAST_DAYS_VOLUME_QUERY, LAST_HOURS_VOLUME_QUERY, TOTALS_QUERY } from './queries'
 

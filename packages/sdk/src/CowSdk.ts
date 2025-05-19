@@ -1,14 +1,14 @@
-import { setGlobalAdapter } from '@cowprotocol/common'
-import { AppDataApi } from '@cowprotocol/cow-app-data'
-import { OrderBookApi } from '@cowprotocol/cow-order-book'
-import { ApiBaseUrls, SupportedChainId } from '@cowprotocol/config'
-import { ApiContext } from '@cowprotocol/config'
+import { setGlobalAdapter } from '@cowprotocol/sdk-common'
+import { AppDataApi } from '@cowprotocol/sdk-app-data'
+import { OrderBookApi } from '@cowprotocol/sdk-order-book'
+import { ApiBaseUrls, SupportedChainId } from '@cowprotocol/sdk-config'
+import { ApiContext } from '@cowprotocol/sdk-config'
 import { CowSdkOptions } from './types'
 import { SubgraphApi } from '@cowprotocol/sdk-subgraph'
 
 // Re-export components for convenience
-export * from '@cowprotocol/cow-app-data'
-export * from '@cowprotocol/cow-order-book'
+export * from '@cowprotocol/sdk-app-data'
+export * from '@cowprotocol/sdk-order-book'
 export * from '@cowprotocol/sdk-subgraph'
 
 /**

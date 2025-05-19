@@ -1,5 +1,5 @@
+import { AdapterUtils } from '@cowprotocol/sdk-common'
 import { BigNumberish, BytesLike, ethers, TypedDataDomain, TypedDataField } from 'ethers'
-import { AdapterUtils } from '@cowprotocol/common'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
 
