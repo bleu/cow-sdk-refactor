@@ -114,9 +114,9 @@ describe('Adapter Setup', () => {
       }
 
       // Verify all chain IDs are the same
-      const firstChainId = results[0].chainId
+      const firstChainId = results[0]?.chainId
       for (let i = 1; i < results.length; i++) {
-        expect(results[i].chainId).toBe(firstChainId)
+        expect(results[i]?.chainId).toBe(firstChainId)
       }
     })
   })
@@ -143,9 +143,9 @@ describe('Adapter Setup', () => {
       }
 
       // Additional verification that all adapters return the same address
-      const firstAddress = results[0].address.toLowerCase()
+      const firstAddress = results[0]?.address.toLowerCase()
       for (let i = 1; i < results.length; i++) {
-        expect(results[i].address.toLowerCase()).toBe(firstAddress)
+        expect(results[i]?.address.toLowerCase()).toBe(firstAddress)
       }
     })
 
@@ -174,9 +174,9 @@ describe('Adapter Setup', () => {
       }
 
       // Additional verification that all adapters return the same signature
-      const firstSignature = results[0].signature.toLowerCase()
+      const firstSignature = results[0]?.signature.toLowerCase()
       for (let i = 1; i < results.length; i++) {
-        expect(results[i].signature.toLowerCase()).toBe(firstSignature)
+        expect(results[i]?.signature.toLowerCase()).toBe(firstSignature)
       }
     })
   })
