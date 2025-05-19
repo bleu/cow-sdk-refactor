@@ -18,7 +18,8 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
-    "@cowprotocol/sdk-common": "workspace:*"
+    "@cowprotocol/sdk-common": "workspace:*",
+    "@cowprotocol/contracts-ts": "workspace:*"
   },
   "peerDependencies": {
     "ethers": "^6.13.7"

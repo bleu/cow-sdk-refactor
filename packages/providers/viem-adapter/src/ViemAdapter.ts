@@ -8,26 +8,44 @@ import {
   Transport,
   Chain,
   getContract as getViemContract,
-  TypedDataDomain,
   Abi,
+  Address,
+  TypedDataDomain,
+  GetContractReturnType,
+  zeroAddress,
 } from 'viem'
 
 import {
+  AdapterTypes,
   AbstractProviderAdapter,
   TransactionParams,
   TransactionResponse,
   TransactionReceipt,
 } from '@cowprotocol/sdk-common'
-import { SignTypedDataParameters } from 'viem/accounts'
+
+interface ViemTypes extends AdapterTypes {
+  Abi: Abi
+  Address: Address
+  Bytes: `0x${string}`
+  BigIntish: bigint
+  ContractInterface: unknown
+  Provider: PublicClient
+  Signer: WalletClient
+  TypedDataDomain: TypedDataDomain
+  TypedDataTypes: Record<string, unknown>
+}
 import { ViemUtils } from './ViemUtils'
 
-export class ViemAdapter implements AbstractProviderAdapter {
+export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
+  declare protected _type?: ViemTypes
   private publicClient: PublicClient
   private walletClient: WalletClient
   private account?: Account
   public utils: ViemUtils
 
   constructor(chain: Chain, transport: Transport = http(), account?: Account | `0x${string}`) {
+    super()
+    this.ZERO_ADDRESS = zeroAddress
     this.publicClient = createPublicClient({
       chain,
       transport,
@@ -128,7 +146,7 @@ export class ViemAdapter implements AbstractProviderAdapter {
   async signTypedData(
     domain: TypedDataDomain,
     types: Record<string, unknown>,
-    value: SignTypedDataParameters<Record<string, unknown>>,
+    value: Record<string, unknown>,
   ): Promise<string> {
     if (!this.account) {
       throw new Error('No account provided')
@@ -178,11 +196,18 @@ export class ViemAdapter implements AbstractProviderAdapter {
     return Number(count)
   }
 
-  getContract(address: string, abi: Abi): unknown {
+  getContract(address: string, abi: Abi): GetContractReturnType {
     return getViemContract({
       address: address as `0x${string}`,
       abi,
       client: this.publicClient,
+    })
+  }
+
+  async getStorageAt(address: Address, slot: `0x${string}`) {
+    return this.publicClient.getStorageAt({
+      address,
+      slot,
     })
   }
 }

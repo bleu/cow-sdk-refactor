@@ -1,33 +1,43 @@
-import { AdapterUtils } from './types'
+import type { AdapterTypes, AdapterUtils } from './types'
 
 /**
  * AbstractProviderAdapter defines the common interface that all provider-specific
  * implementations must follow. This ensures consistent interaction with different
  * Ethereum libraries throughout the SDK.
  */
-export interface AbstractProviderAdapter {
-  utils: AdapterUtils
+export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTypes> {
+  protected _type?: T
+
+  public ZERO_ADDRESS!: T['Address']
+
+  public abstract utils: AdapterUtils
 
   // Core functionality
-  getChainId(): Promise<number>
-  getAddress(): Promise<string>
+  abstract getChainId(): Promise<number>
+  abstract getAddress(): Promise<string>
 
   // Transaction handling
-  sendTransaction(txParams: TransactionParams): Promise<TransactionResponse>
-  estimateGas(txParams: TransactionParams): Promise<bigint>
+  abstract sendTransaction(txParams: TransactionParams): Promise<TransactionResponse>
+  abstract estimateGas(txParams: TransactionParams): Promise<bigint>
 
   // Signing operations
-  signMessage(message: string | Uint8Array): Promise<string>
-  signTypedData(domain: unknown, types: unknown, value: unknown): Promise<string>
+  abstract signMessage(message: string | Uint8Array): Promise<string>
+  abstract signTypedData(
+    domain: T['TypedDataDomain'],
+    types: T['TypedDataTypes'],
+    value: Record<string, unknown>,
+  ): Promise<string>
 
   // Data retrieval
-  call(txParams: TransactionParams): Promise<string>
-  getCode(address: string): Promise<string>
-  getBalance(address: string): Promise<bigint>
-  getTransactionCount(address: string): Promise<number>
+  abstract call(txParams: TransactionParams): Promise<string>
+  abstract getCode(address: string): Promise<string>
+  abstract getBalance(address: string): Promise<bigint>
+  abstract getTransactionCount(address: string): Promise<number>
 
   // Contract interaction
-  getContract(address: string, abi: unknown): unknown
+  abstract getContract(address: string, abi: T['Abi']): unknown
+
+  abstract getStorageAt(address: T['Address'], slot: unknown): Promise<unknown>
 }
 
 /**

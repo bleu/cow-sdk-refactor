@@ -147,6 +147,28 @@ importers:
         specifier: ^5.2.2
         version: 5.8.2
 
+  packages/contracts-ts:
+    dependencies:
+      '@cowprotocol/sdk-common':
+        specifier: workspace:*
+        version: link:../common
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.31
+        version: 20.17.41
+      eslint:
+        specifier: ^8.48.0
+        version: 8.57.1
+      tsup:
+        specifier: ^7.2.0
+        version: 7.3.0(postcss@8.5.3)(ts-node@10.9.2(@types/node@20.17.41)(typescript@5.8.2))(typescript@5.8.2)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.8.2
+      vitest:
+        specifier: ^0.34.3
+        version: 0.34.6(terser@5.39.0)
+
   packages/cow-app-data:
     dependencies:
       '@cowprotocol/sdk-common':
@@ -313,6 +335,9 @@ importers:
 
   packages/providers/ether-v5-adapter:
     dependencies:
+      '@cowprotocol/contracts-ts':
+        specifier: workspace:*
+        version: link:../../contracts-ts
       '@cowprotocol/sdk-common':
         specifier: workspace:*
         version: link:../../common
@@ -344,6 +369,9 @@ importers:
 
   packages/providers/ether-v6-adapter:
     dependencies:
+      '@cowprotocol/contracts-ts':
+        specifier: workspace:*
+        version: link:../../contracts-ts
       '@cowprotocol/sdk-common':
         specifier: workspace:*
         version: link:../../common
@@ -485,12 +513,30 @@ importers:
 
   packages/ui:
     dependencies:
+      '@cowprotocol/contracts-ts':
+        specifier: workspace:*
+        version: link:../contracts-ts
+      '@cowprotocol/sdk-common':
+        specifier: workspace:*
+        version: link:../common
+      '@cowprotocol/sdk-ethers-v5-adapter':
+        specifier: workspace:*
+        version: link:../providers/ether-v5-adapter
+      '@cowprotocol/sdk-viem-adapter':
+        specifier: workspace:*
+        version: link:../providers/viem-adapter
+      ethers:
+        specifier: ^5.7.2
+        version: 5.8.0
       react:
         specifier: ^19.1.0
         version: 19.1.0
       react-dom:
         specifier: ^19.1.0
         version: 19.1.0(react@19.1.0)
+      viem:
+        specifier: ^2.28.4
+        version: 2.29.0(typescript@5.8.2)(zod@3.24.4)
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
