@@ -15,12 +15,10 @@ export class AdapterContext {
   }
 
   public setAdapter(adapter: AbstractProviderAdapter): void {
-    console.log('setAdapter', adapter)
     this._adapter = adapter
   }
 
   public getAdapter(): AbstractProviderAdapter {
-    console.log('trying to get')
     if (!this._adapter) {
       throw new Error(
         'Provider adapter is not configurated. Configure with CowSdk or using AdapterContext.getInstance().setAdapter()',
@@ -32,14 +30,11 @@ export class AdapterContext {
 
 // Utility to get the global adapter
 export function getGlobalAdapter(): AbstractProviderAdapter {
-  console.log('trying to get global')
   return AdapterContext.getInstance().getAdapter()
 }
 
 // Utility to set the global adapter
 export function setGlobalAdapter(adapter: AbstractProviderAdapter): void {
-  console.log('setting global adapter', adapter)
   const instance = AdapterContext.getInstance()
-  console.log('instance', instance)
   instance.setAdapter(adapter)
 }
