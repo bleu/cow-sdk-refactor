@@ -1,3 +1,4 @@
+import { AbstractSigner } from './AbstractSigner'
 import type { AdapterTypes, AdapterUtils } from './types'
 
 /**
@@ -10,6 +11,8 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
 
   public ZERO_ADDRESS!: T['Address']
 
+  // eslint-disable-next-line
+  public abstract Signer: new (signer: any) => AbstractSigner
   public abstract utils: AdapterUtils
 
   // Core functionality

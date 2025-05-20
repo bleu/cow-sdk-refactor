@@ -1,4 +1,4 @@
-import { AbstractProviderAdapter, AdapterTypes, setGlobalAdapter } from '@cowprotocol/common'
+import { AbstractProviderAdapter, setGlobalAdapter } from '@cowprotocol/common'
 import {
   hashify,
   normalizeBuyTokenBalance,
@@ -41,7 +41,7 @@ import {
 } from './settlement'
 import { encodeSwapStep, SwapEncoder } from './swap'
 
-export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
+export class ContractsTs {
   // Make ORDER_TYPE_FIELDS and ORDER_UID_LENGTH available
   public ORDER_TYPE_FIELDS = ORDER_TYPE_FIELDS
   public ORDER_UID_LENGTH = ORDER_UID_LENGTH
@@ -116,7 +116,7 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
    * signature.
    * @return An EIP-712 compatible typed domain data.
    */
-  public domain(chainId: number, verifyingContract: string): T['TypedDataDomain'] {
+  public static domain(chainId: number, verifyingContract: string) {
     return {
       name: 'Gnosis Protocol',
       version: 'v2',
