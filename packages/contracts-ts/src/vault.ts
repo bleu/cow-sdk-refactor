@@ -6,10 +6,12 @@ import { ContractInterface, getGlobalAdapter } from '@cowprotocol/common'
  * This definition only contains the Vault methods that are used by GPv2 Vault
  * relayer. It is copied here to avoid relying on build artifacts.
  */
-export const VAULT_INTERFACE = getGlobalAdapter().utils.createInterface([
-  'function manageUserBalance((uint8, address, uint256, address, address)[])',
-  'function batchSwap(uint8, (bytes32, uint256, uint256, uint256, bytes)[], address[], (address, bool, address, bool), int256[], uint256)',
-])
+export function getVaultInterface(): ContractInterface {
+  return getGlobalAdapter().utils.createInterface([
+    'function manageUserBalance((uint8, address, uint256, address, address)[])',
+    'function batchSwap(uint8, (bytes32, uint256, uint256, uint256, bytes)[], address[], (address, bool, address, bool), int256[], uint256)',
+  ])
+}
 
 /**
  * Grants the required roles to the specified Vault relayer.
@@ -27,14 +29,15 @@ export async function grantRequiredRoles(
   vaultAddress: string,
   vaultRelayerAddress: string,
 ): Promise<void> {
+  const vaultInferface = getVaultInterface()
   //@ts-expect-error: ContractInferface type is unknown
-  for (const name in this.VAULT_INTERFACE.functions) {
+  for (const name in vaultInferface.functions) {
     //@ts-expect-error: ContractInferface type is unknown
     await authorizer.grantRole(
       getGlobalAdapter().utils.solidityKeccak256(
         ['uint256', 'bytes4'],
         //@ts-expect-error: ContractInferface type is unknown
-        [vaultAddress, VAULT_INTERFACE.getSighash(name)],
+        [vaultAddress, vaultInferface.getSighash(name)],
       ),
       vaultRelayerAddress,
     )
