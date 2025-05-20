@@ -23,7 +23,7 @@ import {
   AdapterTypes,
 } from '@cowprotocol/common'
 
-interface ViemTypes extends AdapterTypes {
+export interface ViemTypes extends AdapterTypes {
   Abi: Abi
   Address: Address
   Bytes: `0x${string}`

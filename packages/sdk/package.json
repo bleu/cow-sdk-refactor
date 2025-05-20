@@ -36,6 +36,7 @@
   "dependencies": {
     "@cowprotocol/common": "workspace:*",
     "@cowprotocol/config": "workspace:*",
+    "@cowprotocol/sdk-contracts-ts": "workspace:*",
     "@cowprotocol/cow-app-data": "workspace:*",
     "@cowprotocol/cow-order-book": "workspace:*"
   },

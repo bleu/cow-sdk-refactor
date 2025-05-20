@@ -22,7 +22,7 @@ import { TypedDataDomain } from 'ethers'
 
 type Abi = ConstructorParameters<typeof Interface>[0]
 
-interface EthersV6Types extends AdapterTypes {
+export interface EthersV6Types extends AdapterTypes {
   Abi: Abi
   Address: string
   Bytes: BytesLike

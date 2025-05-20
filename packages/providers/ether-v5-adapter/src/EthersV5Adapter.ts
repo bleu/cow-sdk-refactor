@@ -6,7 +6,7 @@ import { EthersV5Utils } from './EthersV5Utils'
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
 type Interface = ethers.utils.Interface
 
-interface EthersV5Types extends AdapterTypes {
+export interface EthersV5Types extends AdapterTypes {
   Abi: Abi
   Address: string
   Bytes: BytesLike
