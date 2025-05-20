@@ -165,9 +165,6 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.8.2
-      vitest:
-        specifier: ^0.34.3
-        version: 0.34.6
 
   packages/cow-app-data:
     dependencies:
@@ -338,9 +335,6 @@ importers:
       '@cowprotocol/common':
         specifier: workspace:*
         version: link:../../common
-      '@cowprotocol/contracts-ts':
-        specifier: workspace:*
-        version: link:../../contracts-ts
       '@ethersproject/abstract-signer':
         specifier: ^5.8.0
         version: 5.8.0
@@ -372,9 +366,6 @@ importers:
       '@cowprotocol/common':
         specifier: workspace:*
         version: link:../../common
-      '@cowprotocol/contracts-ts':
-        specifier: workspace:*
-        version: link:../../contracts-ts
       ethers:
         specifier: ^6.13.7
         version: 6.14.1
@@ -488,12 +479,6 @@ importers:
 
   packages/ui:
     dependencies:
-      '@cowprotocol/common':
-        specifier: workspace:*
-        version: link:../common
-      '@cowprotocol/contracts-ts':
-        specifier: workspace:*
-        version: link:../contracts-ts
       '@cowprotocol/sdk-ethers-v5-adapter':
         specifier: workspace:*
         version: link:../providers/ether-v5-adapter
