@@ -1,21 +1,7 @@
 import { Bytes, ContractInterface, getGlobalAdapter, Provider } from '@cowprotocol/common'
 
-/**
- * Compute an EIP-1967 slot for the specified name. The proxy contract used by
- * `hardhat-deploy` implements EIP-1967 (Standard Proxy Storage Slot).
- *
- * <https://eips.ethereum.org/EIPS/eip-1967>.
- */
-function slot(name: string): Bytes {
-  return getGlobalAdapter().utils.encodeAbi(
-    ['bytes32'],
-    //@ts-expect-error: bigintish type is unknown
-    [this.adapter.toBigIntish(this.adapter.id(name)) - this.adapter.newBigintish(1)],
-  )
-}
-
-const IMPLEMENTATION_STORAGE_SLOT = slot('eip1967.proxy.implementation')
-const OWNER_STORAGE_SLOT = slot('eip1967.proxy.admin')
+const IMPLEMENTATION_STORAGE_SLOT = '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
+const OWNER_STORAGE_SLOT = '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103'
 
 /**
  * Returns the address of the implementation of an EIP-1967-compatible proxy
