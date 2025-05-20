@@ -1,4 +1,5 @@
 export * from './AbstractProviderAdapter'
+export * from './AbstractSigner'
 export * from './types'
 export * from './context'
 export * from './types'
