@@ -22,7 +22,7 @@ import {
   SigningScheme,
   signOrder,
 } from './sign'
-import { grantRequiredRoles, VAULT_INTERFACE } from './vault'
+import { getVaultInterface, grantRequiredRoles } from './vault'
 import {
   encodeSigningScheme,
   decodeSigningScheme,
@@ -87,7 +87,7 @@ export class ContractsTs<T extends AdapterTypes = AdapterTypes> {
 
   //vault
   grantRequiredRoles = grantRequiredRoles
-  VAULT_INTERFACE = VAULT_INTERFACE
+  getVaultInterface = getVaultInterface
 
   //settlement
   encodeSigningScheme = encodeSigningScheme

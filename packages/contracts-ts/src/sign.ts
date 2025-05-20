@@ -6,11 +6,7 @@ import { ORDER_TYPE_FIELDS, Order, normalizeOrder } from './order'
  * successfully. The value is defined in the EIP-1271 standard as:
  * bytes4(keccak256("isValidSignature(bytes32,bytes)"))
  */
-export const EIP1271_MAGICVALUE = getGlobalAdapter().utils.hexDataSlice(
-  getGlobalAdapter().utils.id('isValidSignature(bytes32,bytes)'),
-  0,
-  4,
-)
+export const EIP1271_MAGICVALUE = '0x1626ba7e'
 
 /**
  * The signing scheme used to sign the order.
