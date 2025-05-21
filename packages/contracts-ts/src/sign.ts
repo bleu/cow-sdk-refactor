@@ -108,25 +108,14 @@ async function ecdsaSignTypedData(
 ): Promise<string> {
   let signature: string | null = null
   const adapter = getGlobalAdapter()
+  const signer = new adapter.Signer(owner)
 
   switch (scheme) {
     case SigningScheme.EIP712:
-      //@ts-expect-error signer type is unknown
-      if (owner?.signTypedData) {
-        //@ts-expect-error signer type is unknown
-        signature = await owner.signTypedData(domain, types, data)
-        break
-      }
-      //@ts-expect-error signer type is unknown
-      if (owner?._signTypedData) {
-        //@ts-expect-error signer type is unknown
-        signature = await owner._signTypedData(domain, types, data)
-        break
-      }
+      signature = await signer.signTypedData(domain, types, data)
       break
     case SigningScheme.ETHSIGN:
-      //@ts-expect-error signer type is unknown
-      signature = await owner.signMessage(adapter.utils.arrayify(adapter.utils.hashTypedData(domain, types, data)))
+      signature = await signer.signMessage(adapter.utils.arrayify(adapter.utils.hashTypedData(domain, types, data)))
       break
     default:
       throw new Error('invalid signing scheme')
