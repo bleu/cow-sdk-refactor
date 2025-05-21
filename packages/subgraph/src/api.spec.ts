@@ -3,12 +3,12 @@ import fetchMock, { enableFetchMocks } from 'jest-fetch-mock'
 import { CowError } from '@cowprotocol/sdk-common'
 import { SupportedChainId } from '@cowprotocol/sdk-config'
 import { LAST_DAYS_VOLUME_QUERY, LAST_HOURS_VOLUME_QUERY, TOTALS_QUERY } from './queries'
-import { SUBGRAPH_PROD_CONFIG, SubgraphApi } from './api'
+import { SubgraphApi } from './api'
 
 enableFetchMocks()
 
-const cowSubgraphApi = new SubgraphApi()
-const prodUrls = SUBGRAPH_PROD_CONFIG
+const cowSubgraphApi = new SubgraphApi({}, 'FakeApiKey')
+const prodUrls = cowSubgraphApi.SUBGRAPH_PROD_CONFIG
 
 const headers = {
   'Content-Type': 'application/json',

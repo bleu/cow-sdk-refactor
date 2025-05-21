@@ -1,5 +1,5 @@
 overwrite: true
-schema: 'https://api.thegraph.com/subgraphs/name/cowprotocol/cow'
+schema: 'https://gateway.thegraph.com/api/[ADD-YOUR-API-KEY]/subgraphs/id/8mdwJG7YCSwqfxUbhCypZvoubeZcFVpCHb4zmHhvuKTD'
 documents: './src/queries.ts'
 generates:
   src/graphql.ts:
