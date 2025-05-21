@@ -80,8 +80,9 @@ export class ViemUtils implements AdapterUtils {
     return hexToBytes(hexString as Hex)
   }
 
-  hexlify(value: `0x${string}`): string {
-    return value
+  hexlify(value: `0x${string}` | Uint8Array): string {
+    if (typeof value === 'string') return value
+    return this.bytesToHex(value)
   }
 
   solidityPack(types: string[], values: unknown[]): string {
