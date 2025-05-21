@@ -126,8 +126,6 @@ describe('Interactions and EIP-1271 Signatures', () => {
           '0x29a674dfc87f8c78fc2bfbcbe8ffdd435091a6a84bc7761db72a45da453d73ac41c5ce28eceb34be73fddc12a5d04af6e736405e41b613aeefeed3db8122420c1b',
       }
 
-      log('here1')
-
       // Encode with each adapter
       setGlobalAdapter(adapters.ethersV5Adapter)
       const ethersV5Encoded = encodeEip1271SignatureData(signatureData)
@@ -138,13 +136,9 @@ describe('Interactions and EIP-1271 Signatures', () => {
       setGlobalAdapter(adapters.viemAdapter)
       const viemEncoded = encodeEip1271SignatureData(signatureData)
 
-      log('here2')
-
       // Encoded signatures should be identical
       expect(ethersV5Encoded).toEqual(ethersV6Encoded)
-      log('here3')
       expect(ethersV5Encoded).toEqual(viemEncoded)
-      log('here4')
 
       // Decode with each adapter
       setGlobalAdapter(adapters.ethersV5Adapter)
@@ -157,11 +151,8 @@ describe('Interactions and EIP-1271 Signatures', () => {
       const viemDecoded = decodeEip1271SignatureData(viemEncoded)
 
       // Decoded signatures should be identical and match input
-      log('here5')
       expect(ethersV5Decoded).toEqual(signatureData)
-      log('here6')
       expect(ethersV6Decoded).toEqual(signatureData)
-      log('here7')
       expect(viemDecoded).toEqual(signatureData)
 
       // Test with different signature lengths

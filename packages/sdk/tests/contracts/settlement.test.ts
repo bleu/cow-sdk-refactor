@@ -2,7 +2,7 @@ import { sepolia } from 'viem/chains'
 import { createAdapters, TEST_ADDRESS, TEST_PRIVATE_KEY, TEST_RPC_URL } from '../setup'
 import { ethers as ethersV5 } from 'ethers-v5'
 import * as ethersV6 from 'ethers-v6'
-import { setGlobalAdapter, TypedDataDomain } from '@cowprotocol/common'
+import { setGlobalAdapter } from '@cowprotocol/common'
 import {
   ContractsTs,
   Order,
@@ -15,9 +15,6 @@ import {
 } from '@cowprotocol/sdk-contracts-ts'
 import { privateKeyToAccount } from 'viem/accounts'
 import { createWalletClient, http } from 'viem'
-
-//@ts-ignore
-import { log } from 'console'
 
 describe('SettlementEncoder', () => {
   let adapters: ReturnType<typeof createAdapters>
@@ -106,8 +103,6 @@ describe('SettlementEncoder', () => {
       ethersV6Encoder.encodeInteraction(testInteraction, InteractionStage.PRE)
       setGlobalAdapter(adapters.viemAdapter)
       viemEncoder.encodeInteraction(testInteraction, InteractionStage.PRE)
-
-      log({ walletClient })
 
       // Add the same trades to each encoder
       setGlobalAdapter(adapters.ethersV5Adapter)
