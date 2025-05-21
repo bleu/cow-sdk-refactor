@@ -38,11 +38,11 @@ export class ViemUtils implements AdapterUtils {
     })
   }
 
-  getCreate2Address(from: Address, salt: Hex, bytecode: Hex): `0x${string}` {
+  getCreate2Address(from: Address, salt: Hex, bytecodeHash: Hex): `0x${string}` {
     return getCreate2Address({
       from,
       salt,
-      bytecode,
+      bytecodeHash,
     })
   }
 

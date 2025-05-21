@@ -60,5 +60,5 @@ export const EIP173_PROXY_ABI = [
 export function proxyInterface(contract: ContractInterface): ContractInterface {
   const adapter = getGlobalAdapter()
   //@ts-expect-error: abstract type is unknown
-  return adapter.getContract(contract.address, this.EIP173_PROXY_ABI, contract.signer ?? contract.provider)
+  return adapter.getContract(contract.address, EIP173_PROXY_ABI, contract.signer ?? contract.provider)
 }

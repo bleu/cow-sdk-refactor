@@ -70,7 +70,8 @@ export function deterministicDeploymentAddress<C>(
   deploymentArguments: DeploymentArguments<C>,
 ): Address {
   const adapter = getGlobalAdapter()
-  const deployData = adapter.utils.hexConcat([bytecode, adapter.utils.encodeDeploy(deploymentArguments, abi as Abi)])
 
-  return adapter.utils.getCreate2Address(DEPLOYER_CONTRACT, SALT, adapter.utils.keccak256(deployData))
+  const bytecodeHash = adapter.utils.keccak256(adapter.utils.hexConcat([bytecode, ...deploymentArguments]))
+
+  return adapter.utils.getCreate2Address(DEPLOYER_CONTRACT, SALT, bytecodeHash)
 }
