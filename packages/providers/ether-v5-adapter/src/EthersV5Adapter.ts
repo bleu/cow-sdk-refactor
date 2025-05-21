@@ -1,6 +1,6 @@
 import { BigNumberish, BytesLike, ethers } from 'ethers'
 import type { TypedDataDomain, TypedDataField, TypedDataSigner } from '@ethersproject/abstract-signer'
-import { AbstractProviderAdapter, AdapterTypes, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { AbstractProviderAdapter, TransactionParams, TransactionResponse, AdapterTypes } from '@cowprotocol/sdk-common'
 import { EthersV5Utils } from './EthersV5Utils'
 import { EthersV5SignerAdapter } from './EthersV5SignerAdapter'
 

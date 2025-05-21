@@ -1,5 +1,4 @@
-import { AdapterUtils } from '@cowprotocol/common'
-
+import { AdapterUtils } from '@cowprotocol/sdk-common'
 import {
   encodeDeployData,
   Abi,

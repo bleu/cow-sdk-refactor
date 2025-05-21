@@ -1,5 +1,5 @@
 {
-  "name": "@cowprotocol/cow-app-data",
+  "name": "@cowprotocol/sdk-app-data",
   "version": "0.1.0",
   "description": "CowProtocol AppData",
   "type": "module",
@@ -39,7 +39,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@cowprotocol/common": "workspace:*",
+    "@cowprotocol/sdk-common": "workspace:*",
     "ajv": "^8.11.0",
     "cross-fetch": "^3.1.5",
     "ipfs-only-hash": "^4.0.0",

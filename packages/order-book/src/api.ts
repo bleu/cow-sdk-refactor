@@ -1,8 +1,15 @@
 import 'cross-fetch/polyfill'
 import { RateLimiter } from 'limiter'
-import { SupportedChainId } from '@cowprotocol/config'
-import { ApiBaseUrls, ApiContext, CowEnv, PartialApiContext } from '@cowprotocol/config'
-import { CowError } from '@cowprotocol/common'
+import {
+  SupportedChainId,
+  DEFAULT_COW_API_CONTEXT,
+  ENVS_LIST,
+  ApiBaseUrls,
+  ApiContext,
+  CowEnv,
+  PartialApiContext,
+} from '@cowprotocol/sdk-config'
+import { CowError, log, jsonWithBigintReplacer } from '@cowprotocol/sdk-common'
 import {
   Address,
   AppDataHash,
@@ -23,8 +30,6 @@ import {
 import { DEFAULT_BACKOFF_OPTIONS, DEFAULT_LIMITER_OPTIONS, FetchParams, OrderBookApiError, request } from './request'
 import { transformOrder } from './transformOrder'
 import { EnrichedOrder } from './types'
-import { DEFAULT_COW_API_CONTEXT, ENVS_LIST } from '@cowprotocol/config'
-import { log, jsonWithBigintReplacer } from '@cowprotocol/common'
 
 /**
  * An object containing *production* environment base URLs for each supported `chainId`.
@@ -90,7 +95,7 @@ export type GetOrdersRequest = {
  * @example Usage with the standalone OrderBook module:
  *
  * ```typescript
- * import { OrderBookApi } from '@cowprotocol/cow-order-book'
+ * import { OrderBookApi } from '@cowprotocol/sdk-order-book'
  * import { OrderSigningUtils, SupportedChainId } from '@cowprotocol/cow-sdk'
  * import { ethers } from 'ethers'
  *

@@ -13,16 +13,16 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts --format esm,cjs --watch --dts",
     "lint": "eslint src/**/*.ts",
     "test": "jest",
+    "test:watch": "jest --watch",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "devDependencies": {
     "@cowprotocol/sdk-ethers-v5-adapter": "workspace:*",
     "@cowprotocol/sdk-ethers-v6-adapter": "workspace:*",
     "@cowprotocol/sdk-viem-adapter": "workspace:*",
-    "@types/jest": "^29.5.5",
+    "@types/jest": "^29.5.12",
     "@types/node": "^20.17.31",
     "ethers-v5": "npm:ethers@^5.7.2",
     "ethers-v6": "npm:ethers@^6.13.7",
@@ -34,11 +34,11 @@
     "viem": "^2.28.4"
   },
   "dependencies": {
-    "@cowprotocol/common": "workspace:*",
-    "@cowprotocol/config": "workspace:*",
-    "@cowprotocol/sdk-contracts-ts": "workspace:*",
-    "@cowprotocol/cow-app-data": "workspace:*",
-    "@cowprotocol/cow-order-book": "workspace:*"
+    "@cowprotocol/sdk-common": "workspace:*",
+    "@cowprotocol/sdk-config": "workspace:*",
+    "@cowprotocol/sdk-app-data": "workspace:*",
+    "@cowprotocol/sdk-order-book": "workspace:*",
+    "@cowprotocol/sdk-subgraph": "workspace:*"
   },
   "peerDependencies": {
     "cross-fetch": "^3.x",

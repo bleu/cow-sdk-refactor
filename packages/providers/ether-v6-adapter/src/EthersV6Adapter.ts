@@ -17,7 +17,8 @@ import {
   TransactionResponse,
   TransactionReceipt,
   AdapterTypes,
-} from '@cowprotocol/common'
+} from '@cowprotocol/sdk-common'
+
 import { TypedDataDomain } from 'ethers'
 
 type Abi = ConstructorParameters<typeof Interface>[0]
