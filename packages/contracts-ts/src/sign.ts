@@ -178,6 +178,6 @@ export function decodeEip1271SignatureData(signature: Bytes): Eip1271SignatureDa
   const verifier = adapter.utils.getChecksumAddress(adapter.utils.hexlify(arrayifiedSignature.slice(0, 20)))
   return {
     verifier,
-    signature: arrayifiedSignature.slice(20),
+    signature: adapter.utils.hexlify(arrayifiedSignature.slice(20)),
   }
 }
