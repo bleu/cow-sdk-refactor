@@ -5,11 +5,13 @@ import { ApiBaseUrls, SupportedChainId } from '@cowprotocol/sdk-config'
 import { ApiContext } from '@cowprotocol/sdk-config'
 import { CowSdkOptions } from './types'
 import { SubgraphApi } from '@cowprotocol/sdk-subgraph'
+import { ContractsTs } from '@cowprotocol/sdk-contracts-ts'
 
 // Re-export components for convenience
 export * from '@cowprotocol/sdk-app-data'
 export * from '@cowprotocol/sdk-order-book'
 export * from '@cowprotocol/sdk-subgraph'
+export * from '@cowprotocol/sdk-contracts-ts'
 
 /**
  * CowSdk is the main entry point for interacting with the CoW Protocol.
@@ -19,6 +21,7 @@ export class CowSdk {
   public readonly orderBook: OrderBookApi
   public readonly appData: AppDataApi
   public readonly subgraph: SubgraphApi
+  public readonly contracts: ContractsTs
 
   private readonly chainId: SupportedChainId
 
@@ -69,5 +72,6 @@ export class CowSdk {
     this.orderBook = new OrderBookApi(orderBookContext)
     this.appData = new AppDataApi(adapter)
     this.subgraph = new SubgraphApi(subgraphContext)
+    this.contracts = new ContractsTs(adapter)
   }
 }

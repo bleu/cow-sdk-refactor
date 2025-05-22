@@ -10,25 +10,16 @@ import {
 
 import { Interaction, InteractionLike, normalizeInteraction } from './interaction'
 import {
-  NormalizedOrder,
   ORDER_TYPE_FIELDS,
   ORDER_UID_LENGTH,
-  Order,
   OrderBalance,
   OrderFlags,
-  OrderKind,
   hashTypedData,
   normalizeBuyTokenBalance,
   normalizeOrder,
 } from './order'
-import {
-  encodeEip1271SignatureData,
-  signOrder,
-  decodeEip1271SignatureData,
-  EcdsaSigningScheme,
-  Signature,
-  SigningScheme,
-} from './sign'
+import { encodeEip1271SignatureData, signOrder, decodeEip1271SignatureData } from './sign'
+import { EcdsaSigningScheme, Order, Signature, SigningScheme, Trade, OrderKind } from './types'
 
 /**
  * The stage an interaction should be executed in.
@@ -68,32 +59,6 @@ export interface TradeFlags extends OrderFlags {
    */
   signingScheme: SigningScheme
 }
-
-/**
- * Trade parameters used in a settlement.
- */
-export type Trade = TradeExecution &
-  Omit<
-    NormalizedOrder,
-    'sellToken' | 'buyToken' | 'kind' | 'partiallyFillable' | 'sellTokenBalance' | 'buyTokenBalance'
-  > & {
-    /**
-     * The index of the sell token in the settlement.
-     */
-    sellTokenIndex: BigIntish
-    /**
-     * The index of the buy token in the settlement.
-     */
-    buyTokenIndex: BigIntish
-    /**
-     * Encoded order flags.
-     */
-    flags: BigIntish
-    /**
-     * Signature data.
-     */
-    signature: Bytes
-  }
 
 /**
  * Details representing how an order was executed.
@@ -329,7 +294,7 @@ export function encodeTrade(
   const tradeFlags = {
     ...order,
     signingScheme: signature.scheme,
-  }
+  } as TradeFlags
   const o = normalizeOrder(order)
 
   return {
