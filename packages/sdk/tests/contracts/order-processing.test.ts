@@ -1,5 +1,5 @@
 import { createAdapters, TEST_ADDRESS } from '../setup'
-import { setGlobalAdapter, TypedDataDomain } from '@cowprotocol/common'
+import { setGlobalAdapter, TypedDataDomain } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
   Order,

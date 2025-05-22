@@ -1,4 +1,4 @@
-import { ContractInterface, getGlobalAdapter } from '@cowprotocol/common'
+import { ContractInterface, getGlobalAdapter } from '@cowprotocol/sdk-common'
 
 /**
  * Balancer Vault partial ABI interface.

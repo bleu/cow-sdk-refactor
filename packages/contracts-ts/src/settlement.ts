@@ -6,7 +6,10 @@ import {
   setGlobalAdapter,
   Signer,
   TypedDataDomain,
-} from '@cowprotocol/common'
+  EcdsaSigningScheme,
+  Signature,
+  SigningScheme,
+} from '@cowprotocol/sdk-common'
 
 import { Interaction, InteractionLike, normalizeInteraction } from './interaction'
 import {
@@ -21,14 +24,7 @@ import {
   normalizeBuyTokenBalance,
   normalizeOrder,
 } from './order'
-import {
-  EcdsaSigningScheme,
-  Signature,
-  SigningScheme,
-  encodeEip1271SignatureData,
-  signOrder,
-  decodeEip1271SignatureData,
-} from './sign'
+import { encodeEip1271SignatureData, signOrder, decodeEip1271SignatureData } from './sign'
 
 /**
  * The stage an interaction should be executed in.

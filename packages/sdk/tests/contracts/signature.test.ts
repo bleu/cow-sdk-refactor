@@ -1,5 +1,5 @@
 import { createAdapters } from '../setup'
-import { setGlobalAdapter } from '@cowprotocol/common'
+import { setGlobalAdapter } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
   InteractionLike,

@@ -1,4 +1,4 @@
-import { BigIntish, Bytes, getGlobalAdapter, TypedDataDomain, TypedDataTypes } from '@cowprotocol/common'
+import { BigIntish, Bytes, getGlobalAdapter, TypedDataDomain, TypedDataTypes } from '@cowprotocol/sdk-common'
 
 /**
  * Gnosis Protocol v2 order data.

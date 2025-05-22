@@ -1,5 +1,5 @@
 import { createAdapters } from '../setup'
-import { setGlobalAdapter } from '@cowprotocol/common'
+import { setGlobalAdapter } from '@cowprotocol/sdk-common'
 import { ContractsTs, getVaultInterface, grantRequiredRoles } from '@cowprotocol/sdk-contracts-ts'
 import { ethers } from 'ethers-v5'
 

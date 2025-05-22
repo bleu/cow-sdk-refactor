@@ -2,7 +2,7 @@ import { sepolia } from 'viem/chains'
 import { createAdapters, TEST_ADDRESS, TEST_PRIVATE_KEY, TEST_RPC_URL } from '../setup'
 import { ethers as ethersV5 } from 'ethers-v5'
 import * as ethersV6 from 'ethers-v6'
-import { setGlobalAdapter } from '@cowprotocol/common'
+import { setGlobalAdapter } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
   Order,

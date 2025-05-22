@@ -1,7 +1,7 @@
 import { createAdapters, TEST_ADDRESS } from '../setup'
 import { ethers as ethersV5 } from 'ethers-v5'
 import * as ethersV6 from 'ethers-v6'
-import { setGlobalAdapter } from '@cowprotocol/common'
+import { setGlobalAdapter } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
   CONTRACT_NAMES,
