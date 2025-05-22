@@ -1,4 +1,4 @@
-import { sepolia as sepoliaConfig } from '@cowprotocol/config'
+import { sepolia as sepoliaConfig } from '@cowprotocol/sdk-config'
 
 import { EthersV5Adapter } from '@cowprotocol/sdk-ethers-v5-adapter'
 import { EthersV6Adapter } from '@cowprotocol/sdk-ethers-v6-adapter'

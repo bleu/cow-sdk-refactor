@@ -5,12 +5,10 @@ import {
   setGlobalAdapter,
   Signer,
   TypedDataDomain,
-  EcdsaSigningScheme,
-  Signature,
 } from '@cowprotocol/sdk-common'
 import { Order, OrderKind } from './order'
 import { TokenRegistry, Trade, encodeTrade } from './settlement'
-import { signOrder } from './sign'
+import { EcdsaSigningScheme, Signature, signOrder } from './sign'
 
 /**
  * A Balancer swap used for settling a single order against Balancer pools.

@@ -1,4 +1,11 @@
-import { Bytes, getGlobalAdapter, SignatureLike, Signer, TypedDataDomain, TypedDataTypes } from '@cowprotocol/common'
+import {
+  Bytes,
+  getGlobalAdapter,
+  SignatureLike,
+  Signer,
+  TypedDataDomain,
+  TypedDataTypes,
+} from '@cowprotocol/sdk-common'
 import { ORDER_TYPE_FIELDS, Order, normalizeOrder } from './order'
 
 /**
