@@ -1,4 +1,4 @@
-import { BigIntish, Bytes } from '@cowprotocol/common'
+import { BigIntish, Bytes } from '@cowprotocol/sdk-common'
 
 /**
  * Gnosis Protocol v2 interaction data.

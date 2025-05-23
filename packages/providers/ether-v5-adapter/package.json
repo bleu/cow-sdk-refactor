@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@cowprotocol/sdk-common": "workspace:*",
-    "@cowprotocol/contracts-ts": "workspace:*"
+    "@cowprotocol/sdk-contracts-ts": "workspace:*"
   },
   "peerDependencies": {
     "@ethersproject/abstract-signer": "^5.8.0",

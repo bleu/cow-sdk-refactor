@@ -1,5 +1,5 @@
 import { Account, WalletClient, PublicClient, Address, TypedDataDomain, TypedDataParameter } from 'viem'
-import { AbstractSigner, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { AbstractSigner, TransactionParams, TransactionResponse } from '@cowprotocol/sdk-common'
 
 export class ViemSignerAdapter extends AbstractSigner {
   private _client: WalletClient

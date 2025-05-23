@@ -1,5 +1,5 @@
 {
-  "name": "@cowprotocol/contracts-ts",
+  "name": "@cowprotocol/sdk-contracts-ts",
   "version": "0.1.0",
   "description": "TypeScript contract bindings for CoW Protocol SDK",
   "main": "./dist/index.js",
@@ -14,8 +14,6 @@
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "dev": "tsup src/index.ts --format esm,cjs --watch --dts",
     "lint": "eslint src/**/*.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "dependencies": {
@@ -25,7 +23,6 @@
     "@types/node": "^20.17.31",
     "eslint": "^8.48.0",
     "tsup": "^7.2.0",
-    "typescript": "^5.2.2",
-    "vitest": "^0.34.3"
+    "typescript": "^5.2.2"
   }
 }
