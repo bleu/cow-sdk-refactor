@@ -16,7 +16,7 @@ import { deterministicDeploymentAddress } from './deploy'
 import { normalizeInteraction, normalizeInteractions } from './interaction'
 import { implementationAddress, ownerAddress, proxyInterface } from './proxy'
 import { decodeEip1271SignatureData, encodeEip1271SignatureData, signOrder } from './sign'
-import { getVaultInterface, grantRequiredRoles } from './vault'
+import { grantRequiredRoles } from './vault'
 import {
   encodeSigningScheme,
   decodeSigningScheme,
@@ -79,7 +79,6 @@ export class ContractsTs {
 
   //vault
   grantRequiredRoles = grantRequiredRoles
-  getVaultInterface = getVaultInterface
 
   //settlement
   encodeSigningScheme = encodeSigningScheme

@@ -23,6 +23,8 @@ import {
   encodeFunctionData,
   recoverMessageAddress,
   recoverTypedDataAddress,
+  toFunctionSelector,
+  AbiFunction,
 } from 'viem'
 
 export class ViemUtils implements AdapterUtils {
@@ -228,5 +230,48 @@ export class ViemUtils implements AdapterUtils {
 
   createInterface(abi: string[]) {
     return parseAbi(abi)
+  }
+
+  async grantRequiredRoles(
+    authorizerAddress: string,
+    authorizerAbi: Abi,
+    vaultAddress: string,
+    vaultRelayerAddress: string,
+    contractCall: (address: string, abi: Abi, functionName: string, args: unknown[]) => Promise<void>,
+  ): Promise<void> {
+    /**
+     * Balancer Vault partial ABI interface.
+     *
+     * This definition only contains the Vault methods that are used by GPv2 Vault
+     * relayer. It is copied here to avoid relying on build artifacts.
+     */
+    const vaultAbiStrings = [
+      'function manageUserBalance((uint8, address, uint256, address, address)[])',
+      'function batchSwap(uint8, (bytes32, uint256, uint256, uint256, bytes)[], address[], (address, bool, address, bool), int256[], uint256)',
+    ]
+
+    // Parse the ABI using viem
+    const vaultAbi = parseAbi(vaultAbiStrings)
+
+    // Get function names
+    const functionNames = ['manageUserBalance', 'batchSwap']
+
+    for (const functionName of functionNames) {
+      // Find the function in the parsed ABI
+      const functionAbi = vaultAbi.find((item) => item.type === 'function' && item.name === functionName) as AbiFunction
+
+      if (!functionAbi) {
+        throw new Error(`Function ${functionName} not found in ABI`)
+      }
+
+      // Get function selector using viem's toFunctionSelector
+      const functionSelector = toFunctionSelector(functionAbi)
+
+      // Compute role hash using solidityKeccak256 (which uses encodePacked + keccak256)
+      const roleHash = this.solidityKeccak256(['uint256', 'bytes4'], [vaultAddress, functionSelector])
+
+      // Call grantRole on the authorizer contract
+      await contractCall(authorizerAddress, authorizerAbi, 'grantRole', [roleHash, vaultRelayerAddress])
+    }
   }
 }
