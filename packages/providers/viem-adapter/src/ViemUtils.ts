@@ -25,6 +25,8 @@ import {
   recoverTypedDataAddress,
   toFunctionSelector,
   AbiFunction,
+  PublicClient,
+  decodeFunctionResult,
 } from 'viem'
 
 export class ViemUtils implements AdapterUtils {
@@ -273,5 +275,48 @@ export class ViemUtils implements AdapterUtils {
       // Call grantRole on the authorizer contract
       await contractCall(authorizerAddress, authorizerAbi, 'grantRole', [roleHash, vaultRelayerAddress])
     }
+  }
+
+  async readStorage(
+    baseAddress: Address,
+    baseAbi: Abi,
+    readerAddress: Address,
+    readerAbi: Abi,
+    client: PublicClient,
+    method: string,
+    parameters: unknown[],
+  ) {
+    // Encode the function call
+    const encodedCall = encodeFunctionData({
+      abi: readerAbi,
+      functionName: method,
+      args: parameters,
+    })
+
+    // Check if simulateDelegatecall exists in base ABI
+    const hasSimulateDelegatecall = baseAbi.some(
+      (item: any) => item.type === 'function' && item.name === 'simulateDelegatecall',
+    )
+
+    if (!hasSimulateDelegatecall) {
+      throw new Error('simulateDelegatecall method not found on base contract')
+    }
+
+    // Call simulateDelegatecall on the base contract
+    const resultBytes = (await client.readContract({
+      address: baseAddress,
+      abi: baseAbi,
+      functionName: 'simulateDelegatecall',
+      args: [readerAddress, encodedCall],
+    })) as Hex
+
+    // Decode the result
+    const decoded = decodeFunctionResult({
+      abi: readerAbi,
+      functionName: method,
+      data: resultBytes,
+    })
+
+    return decoded
   }
 }

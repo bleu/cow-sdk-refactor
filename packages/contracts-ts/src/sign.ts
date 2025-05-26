@@ -1,5 +1,5 @@
 import { Bytes, getGlobalAdapter, Signer, TypedDataDomain, TypedDataTypes } from '@cowprotocol/sdk-common'
-import { ORDER_TYPE_FIELDS, normalizeOrder } from './order'
+import { CANCELLATIONS_TYPE_FIELDS, ORDER_TYPE_FIELDS, normalizeOrder } from './order'
 import { EcdsaSigningScheme, SigningScheme, Order, EcdsaSignature } from './types'
 
 /**
@@ -8,6 +8,12 @@ import { EcdsaSigningScheme, SigningScheme, Order, EcdsaSignature } from './type
  * bytes4(keccak256("isValidSignature(bytes32,bytes)"))
  */
 export const EIP1271_MAGICVALUE = '0x1626ba7e'
+
+/**
+ * Marker value indicating a presignature is set.
+ * const PRE_SIGNED = ethersV5.utils.id("GPv2Signing.Scheme.PreSign");
+ */
+export const PRE_SIGNED = '0xf59c009283ff87aa78203fc4d9c2df025ee851130fb69cc3e068941f6b5e2d6f'
 
 /**
  * EIP-1271 signature data.
@@ -132,5 +138,54 @@ export function decodeEip1271SignatureData(signature: Bytes): Eip1271SignatureDa
   return {
     verifier,
     signature: adapter.utils.hexlify(arrayifiedSignature.slice(20)),
+  }
+}
+
+/**
+ * Returns the signature for cancelling a single order with the specified
+ * signing scheme.
+ *
+ * @param domain The domain to sign the cancellation.
+ * @param orderUid The unique identifier of the order being cancelled.
+ * @param owner The owner for the order used to sign.
+ * @param scheme The signing scheme to use. See {@link SigningScheme} for more
+ * details.
+ * @return Encoded signature including signing scheme for the cancellation.
+ */
+export async function signOrderCancellation(
+  domain: TypedDataDomain,
+  orderUid: Bytes,
+  owner: Signer,
+  scheme: EcdsaSigningScheme,
+): Promise<EcdsaSignature> {
+  return signOrderCancellations(domain, [orderUid], owner, scheme)
+}
+
+/**
+ * Returns the signature for cancelling multiple orders by UID with the
+ * specified signing scheme.
+ *
+ * @param domain The domain to sign the cancellation.
+ * @param orderUids The unique identifiers of the orders to cancel.
+ * @param owner The owner for the order used to sign.
+ * @param scheme The signing scheme to use. See {@link SigningScheme} for more
+ * details.
+ * @return Encoded signature including signing scheme for the cancellation.
+ */
+export async function signOrderCancellations(
+  domain: TypedDataDomain,
+  orderUids: Bytes[],
+  owner: Signer,
+  scheme: EcdsaSigningScheme,
+): Promise<EcdsaSignature> {
+  return {
+    scheme,
+    data: await ecdsaSignTypedData(
+      scheme,
+      owner,
+      domain,
+      { OrderCancellations: CANCELLATIONS_TYPE_FIELDS },
+      { orderUids },
+    ),
   }
 }
