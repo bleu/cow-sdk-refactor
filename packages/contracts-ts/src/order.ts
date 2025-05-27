@@ -66,6 +66,21 @@ export const ORDER_TYPE_FIELDS = [
 ]
 
 /**
+ * The EIP-712 type hash for a Gnosis Protocol v2 order.
+ * ethersV5.utils.id(
+  `Order(${ORDER_TYPE_FIELDS.map(({ name, type }) => `${type} ${name}`).join(
+    ",",
+  )})`,
+);
+ */
+export const ORDER_TYPE_HASH = '0xd5a25ba2e97094ad7d83dc28a6572da797d6b3e7fc6663bd93efb789fc17e489'
+
+/**
+ * The EIP-712 type fields definition for a Gnosis Protocol v2 order.
+ */
+export const CANCELLATIONS_TYPE_FIELDS = [{ name: 'orderUids', type: 'bytes[]' }]
+
+/**
  * Normalizes a timestamp value to a Unix timestamp.
  * @param time The timestamp value to normalize.
  * @return Unix timestamp or number of seconds since the Unix Epoch.
@@ -231,4 +246,26 @@ export function extractOrderUidParams(orderUid: string): OrderUidParams {
     owner: adapter.utils.getChecksumAddress(adapter.utils.hexlify(bytes.subarray(32, 52))),
     validTo: view.getUint32(52),
   }
+}
+
+/**
+ * Compute the 32-byte signing hash for the specified cancellation.
+ *
+ * @param domain The EIP-712 domain separator to compute the hash for.
+ * @param orderUid The unique identifier of the order to cancel.
+ * @return Hex-encoded 32-byte order digest.
+ */
+export function hashOrderCancellation(domain: TypedDataDomain, orderUid: Bytes): string {
+  return hashOrderCancellations(domain, [orderUid])
+}
+
+/**
+ * Compute the 32-byte signing hash for the specified order cancellations.
+ *
+ * @param domain The EIP-712 domain separator to compute the hash for.
+ * @param orderUids The unique identifiers of the orders to cancel.
+ * @return Hex-encoded 32-byte order digest.
+ */
+export function hashOrderCancellations(domain: TypedDataDomain, orderUids: Bytes[]): string {
+  return hashTypedData(domain, { OrderCancellations: CANCELLATIONS_TYPE_FIELDS }, { orderUids })
 }

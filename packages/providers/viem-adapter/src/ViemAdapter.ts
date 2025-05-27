@@ -35,7 +35,12 @@ export interface ViemTypes extends AdapterTypes {
   TypedDataTypes: Record<string, unknown>
 }
 import { ViemUtils } from './ViemUtils'
-import { ViemSignerAdapter } from './ViemSignerAdapter'
+import {
+  IntChainIdTypedDataV4Signer,
+  TypedDataV3Signer,
+  TypedDataVersionedSigner,
+  ViemSignerAdapter,
+} from './ViemSignerAdapter'
 
 export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
   declare protected _type?: ViemTypes
@@ -43,6 +48,9 @@ export class ViemAdapter extends AbstractProviderAdapter<ViemTypes> {
   private walletClient: WalletClient
   private account?: Account
   public Signer = ViemSignerAdapter
+  public TypedDataVersionedSigner = TypedDataVersionedSigner
+  public TypedDataV3Signer = TypedDataV3Signer
+  public IntChainIdTypedDataV4Signer = IntChainIdTypedDataV4Signer
   public utils: ViemUtils
 
   constructor(chain: Chain, transport: Transport = http(), account?: Account | `0x${string}`) {

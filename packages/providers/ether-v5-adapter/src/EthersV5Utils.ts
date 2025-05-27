@@ -1,4 +1,4 @@
-import { AdapterUtils } from '@cowprotocol/sdk-common'
+import { AdapterUtils, Address } from '@cowprotocol/sdk-common'
 import { BigNumberish, BytesLike, ethers, TypedDataDomain, TypedDataField } from 'ethers'
 
 type Abi = ConstructorParameters<typeof ethers.utils.Interface>[0]
@@ -129,6 +129,10 @@ export class EthersV5Utils implements AdapterUtils {
     return ethers.utils.solidityKeccak256(types, values)
   }
 
+  hashDomain(domain: TypedDataDomain): string {
+    return ethers.utils._TypedDataEncoder.hashDomain(domain)
+  }
+
   async grantRequiredRoles(
     authorizerAddress: string,
     authorizerAbi: Abi,
@@ -161,5 +165,25 @@ export class EthersV5Utils implements AdapterUtils {
       // Call grantRole on the authorizer contract
       await contractCall(authorizerAddress, authorizerAbi, 'grantRole', [roleHash, vaultRelayerAddress])
     }
+  }
+
+  async readStorage(
+    baseAddress: Address,
+    baseAbi: Abi,
+    readerAddress: Address,
+    readerAbi: Abi,
+    provider: ethers.providers.JsonRpcProvider,
+    method: string,
+    parameters: unknown[],
+  ) {
+    const base = new ethers.Contract(baseAddress, baseAbi, provider)
+    const reader = new ethers.Contract(readerAddress, readerAbi, provider)
+
+    const encodedCall = reader.interface.encodeFunctionData(method, parameters)
+    if (!base.callStatic.simulateDelegatecall) {
+      throw new Error('simulateDelegatecall method not found on base contract')
+    }
+    const resultBytes = await base.callStatic.simulateDelegatecall(reader.address, encodedCall)
+    return reader.interface.decodeFunctionResult(method, resultBytes)[0]
   }
 }

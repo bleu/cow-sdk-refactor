@@ -1,4 +1,4 @@
-import { Signer, BigNumber, TypedDataDomain, TypedDataField } from 'ethers'
+import { Signer, BigNumber, TypedDataDomain, TypedDataField, ethers } from 'ethers'
 import { AbstractSigner, TransactionParams, TransactionResponse } from '@cowprotocol/sdk-common'
 import { TypedDataSigner } from '@ethersproject/abstract-signer'
 
@@ -79,5 +79,124 @@ export class EthersV5SignerAdapter extends AbstractSigner {
     }
 
     return formatted
+  }
+}
+
+import { _TypedDataEncoder } from 'ethers/lib/utils'
+
+export class TypedDataVersionedSigner extends EthersV5SignerAdapter {
+  private _signMethod: string
+  private signer: ethers.Signer
+  private provider: ethers.providers.JsonRpcProvider
+
+  constructor(signer: Signer & TypedDataSigner, version: 'v3' | 'v4' = 'v3') {
+    super(signer)
+    const versionSuffix = version ? '_' + version : ''
+    this._signMethod = 'eth_signTypedData' + versionSuffix
+    this.signer = signer
+
+    if (!signer.provider) {
+      throw new Error('Signer does not have a provider set')
+    }
+    if (!('send' in signer.provider)) {
+      throw new Error('Provider must be of type JsonRpcProvider')
+    }
+
+    this.provider = signer.provider as ethers.providers.JsonRpcProvider
+  }
+
+  async signTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, TypedDataField[]>,
+    value: Record<string, unknown>,
+  ): Promise<string> {
+    const populated = await _TypedDataEncoder.resolveNames(domain, types, value, (name: string) =>
+      this.resolveName(name),
+    )
+
+    const payload = _TypedDataEncoder.getPayload(populated.domain, types, populated.value)
+    const msg = JSON.stringify(payload)
+    const address = await this.getAddress()
+
+    // Use the provider from the underlying signer
+    if (!this.provider) {
+      throw new Error('Signer does not have a provider set')
+    }
+
+    return await this.provider.send(this._signMethod, [address.toLowerCase(), msg])
+  }
+
+  private async resolveName(name: string): Promise<string> {
+    // Delegate to the underlying signer's resolveName if available
+    if (this.signer.resolveName) {
+      return await this.signer.resolveName(name)
+    }
+    return name
+  }
+}
+
+/**
+ * Wrapper around a TypedDataSigner Signer object that implements `_signTypedData` using
+ * `eth_signTypedData_v3` instead of `eth_signTypedData_v4`.
+ *
+ * Takes a Signer instance on creation.
+ * All other Signer methods are proxied to initial instance.
+ */
+export class TypedDataV3Signer extends TypedDataVersionedSigner {
+  constructor(signer: Signer & TypedDataSigner) {
+    super(signer, 'v3')
+  }
+}
+
+export class IntChainIdTypedDataV4Signer extends EthersV5SignerAdapter {
+  private signer: ethers.Signer & TypedDataSigner
+  private provider: ethers.providers.JsonRpcProvider
+  _isSigner = true
+
+  constructor(signer: Signer & TypedDataSigner) {
+    super(signer)
+    this.signer = signer
+
+    if (!signer.provider) {
+      throw new Error('Signer does not have a provider set')
+    }
+    if (!('send' in signer.provider)) {
+      throw new Error('Provider must be of type JsonRpcProvider')
+    }
+
+    this.provider = signer.provider as ethers.providers.JsonRpcProvider
+  }
+
+  async signTypedData(
+    domain: TypedDataDomain,
+    types: Record<string, TypedDataField[]>,
+    value: Record<string, unknown>,
+  ): Promise<string> {
+    const populated = await _TypedDataEncoder.resolveNames(domain, types, value, (name: string) =>
+      this.resolveName(name),
+    )
+
+    const payload = _TypedDataEncoder.getPayload(populated.domain, types, populated.value)
+
+    // Fix MetaMask chainId issue - convert to number
+    if (payload.domain.chainId) {
+      payload.domain.chainId = parseInt(payload.domain.chainId.toString(), 10)
+    }
+
+    const msg = JSON.stringify(payload)
+    const address = await this.getAddress()
+
+    if (!this.signer.provider) {
+      throw new Error('Signer does not have a provider set')
+    }
+
+    return await this.provider.send('eth_signTypedData_v4', [address.toLowerCase(), msg])
+  }
+
+  private async resolveName(name: string): Promise<string> {
+    if (this.signer.resolveName) {
+      return await this.signer.resolveName(name)
+    }
+    return name
   }
 }

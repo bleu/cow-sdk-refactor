@@ -1,4 +1,14 @@
-import { Bytes, Abi, TypedDataDomain, BigIntish, SignatureLike, ContractInterface, TypedDataTypes } from '.'
+import {
+  Bytes,
+  Abi,
+  TypedDataDomain,
+  BigIntish,
+  SignatureLike,
+  ContractInterface,
+  TypedDataTypes,
+  Address,
+  Provider,
+} from '.'
 
 /**
  * Abstract class defining the interface for adapter utilities
@@ -145,6 +155,11 @@ export abstract class AdapterUtils {
   abstract createInterface(abi: unknown): ContractInterface
 
   /**
+   * Get the hash of a typed data domain
+   */
+  abstract hashDomain(domain: TypedDataDomain, types?: unknown): string
+
+  /**
    * Grants the required roles to the specified Vault relayer.
    * Framework-agnostic method that delegates contract instantiation and calling to the adapter.
    *
@@ -161,4 +176,21 @@ export abstract class AdapterUtils {
     vaultRelayerAddress: string,
     contractCall: (address: string, abi: Abi, functionName: string, args: unknown[]) => Promise<void>,
   ): Promise<void>
+
+  /**
+   * A generic method used to obfuscate the complexity of reading storage
+   * of any StorageAccessible contract. That is, this method does the work of
+   * 1. Encoding the function call on the reader
+   * 2. Simulates delegatecall of storage read with encoded calldata
+   * 3. Decodes the returned bytes from the storage read into expected return value.
+   */
+  abstract readStorage(
+    baseAddress: Address,
+    baseAbi: Abi,
+    readerAddress: Address,
+    readerAbi: Abi,
+    provider: Provider,
+    method: string,
+    parameters: unknown[],
+  ): Promise<any>
 }

@@ -25,6 +25,8 @@ import {
   InterfaceAbi,
   getAddress,
   solidityPackedKeccak256,
+  Contract,
+  JsonRpcProvider,
 } from 'ethers'
 import { TypedDataDomain } from 'ethers'
 
@@ -194,6 +196,10 @@ export class EthersV6Utils implements AdapterUtils {
     return new Interface(abi)
   }
 
+  hashDomain(domain: TypedDataDomain): string {
+    return TypedDataEncoder.hashDomain(domain)
+  }
+
   async grantRequiredRoles(
     authorizerAddress: string,
     authorizerAbi: Abi,
@@ -228,5 +234,28 @@ export class EthersV6Utils implements AdapterUtils {
       // Call grantRole on the authorizer contract
       await contractCall(authorizerAddress, authorizerAbi, 'grantRole', [roleHash, vaultRelayerAddress])
     }
+  }
+
+  async readStorage(
+    baseAddress: string,
+    baseAbi: any[],
+    readerAddress: string,
+    readerAbi: any[],
+    provider: JsonRpcProvider,
+    method: string,
+    parameters: unknown[],
+  ) {
+    const base = new Contract(baseAddress, baseAbi, provider)
+
+    const readerInterface = new Interface(readerAbi)
+    const encodedCall = readerInterface.encodeFunctionData(method, parameters)
+
+    if (!base.simulateDelegatecall?.staticCall) {
+      throw new Error('simulateDelegatecall method not found on base contract')
+    }
+
+    const resultBytes = await base.simulateDelegatecall.staticCall(readerAddress, encodedCall)
+
+    return readerInterface.decodeFunctionResult(method, resultBytes)[0]
   }
 }

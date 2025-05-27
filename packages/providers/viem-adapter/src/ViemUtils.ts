@@ -25,6 +25,9 @@ import {
   recoverTypedDataAddress,
   toFunctionSelector,
   AbiFunction,
+  PublicClient,
+  decodeFunctionResult,
+  toHex,
 } from 'viem'
 
 export class ViemUtils implements AdapterUtils {
@@ -232,6 +235,42 @@ export class ViemUtils implements AdapterUtils {
     return parseAbi(abi)
   }
 
+  hashDomain(domain: TypedDataDomain): string {
+    // 1. Define the EIP712Domain type hash
+    const EIP712_DOMAIN_TYPEHASH = keccak256(
+      toHex('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'),
+    )
+
+    // 2. Hash individual domain fields
+    const nameHash = domain.name
+      ? keccak256(toHex(domain.name))
+      : '0x0000000000000000000000000000000000000000000000000000000000000000'
+    const versionHash = domain.version
+      ? keccak256(toHex(domain.version))
+      : '0x0000000000000000000000000000000000000000000000000000000000000000'
+
+    // 3. Encode the domain struct according to EIP-712
+    const encodedDomain = encodeAbiParameters(
+      [
+        { type: 'bytes32' }, // typeHash
+        { type: 'bytes32' }, // nameHash
+        { type: 'bytes32' }, // versionHash
+        { type: 'uint256' }, // chainId
+        { type: 'address' }, // verifyingContract
+      ],
+      [
+        EIP712_DOMAIN_TYPEHASH,
+        nameHash,
+        versionHash,
+        BigInt(domain.chainId || 0),
+        (domain.verifyingContract as `0x${string}`) || '0x0000000000000000000000000000000000000000',
+      ],
+    )
+
+    // 4. Hash the encoded domain
+    return keccak256(encodedDomain)
+  }
+
   async grantRequiredRoles(
     authorizerAddress: string,
     authorizerAbi: Abi,
@@ -273,5 +312,48 @@ export class ViemUtils implements AdapterUtils {
       // Call grantRole on the authorizer contract
       await contractCall(authorizerAddress, authorizerAbi, 'grantRole', [roleHash, vaultRelayerAddress])
     }
+  }
+
+  async readStorage(
+    baseAddress: Address,
+    baseAbi: Abi,
+    readerAddress: Address,
+    readerAbi: Abi,
+    client: PublicClient,
+    method: string,
+    parameters: unknown[],
+  ) {
+    // Encode the function call
+    const encodedCall = encodeFunctionData({
+      abi: readerAbi,
+      functionName: method,
+      args: parameters,
+    })
+
+    // Check if simulateDelegatecall exists in base ABI
+    const hasSimulateDelegatecall = baseAbi.some(
+      (item: any) => item.type === 'function' && item.name === 'simulateDelegatecall',
+    )
+
+    if (!hasSimulateDelegatecall) {
+      throw new Error('simulateDelegatecall method not found on base contract')
+    }
+
+    // Call simulateDelegatecall on the base contract
+    const resultBytes = (await client.readContract({
+      address: baseAddress,
+      abi: baseAbi,
+      functionName: 'simulateDelegatecall',
+      args: [readerAddress, encodedCall],
+    })) as Hex
+
+    // Decode the result
+    const decoded = decodeFunctionResult({
+      abi: readerAbi,
+      functionName: method,
+      data: resultBytes,
+    })
+
+    return decoded
   }
 }
