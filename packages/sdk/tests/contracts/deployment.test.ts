@@ -106,42 +106,11 @@ describe('Deployment and Proxy', () => {
       }
       const deployerAddress = '0xa90914762709441d557De208bAcE1edB1A3968b2'
 
-      // const testArtifact2 = {
-      //   abi: [
-      //     {
-      //       inputs: [
-      //         { name: 'authenticator', type: 'address' },
-      //         { name: 'allowListConfig', type: 'address' },
-      //       ],
-      //       stateMutability: 'nonpayable',
-      //       type: 'constructor',
-      //     },
-      //   ],
-      //   bytecode: '0x608060405234801561001057600080fd5b506040516102c73803806102c78339',
-      //   contractName: CONTRACT_NAMES.settlement,
-      // }
-
       // Deploy args for second artifact
       const deployArgs = [
         '0x9008D19f58AAbD9eD0D60971565AA8510560ab41',
         '0x1234567890123456789012345678901234567890',
       ] as [string, string]
-
-      // // Compute addresses
-      // setGlobalAdapter(adapters.ethersV5Adapter)
-      // const address1 = deterministicDeploymentAddress(testArtifact1, [] as never)
-      // const address2 = deterministicDeploymentAddress(testArtifact2, deployArgs)
-
-      // // Addresses should be different
-      // expect(address1).not.toEqual(address2)
-
-      // // Changing the arguments should also change the address
-      // const differentArgs = [
-      //   '0x9008D19f58AAbD9eD0D60971565AA8510560ab41',
-      //   '0x0987654321098765432109876543210987654321',
-      // ] as [string, string]
-      // const address3 = deterministicDeploymentAddress(testArtifact2, differentArgs)
-      // expect(address2).not.toEqual(address3)
 
       // Ethers v5
       const x1 = ethersV5.utils.getCreate2Address(
