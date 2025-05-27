@@ -143,4 +143,22 @@ export abstract class AdapterUtils {
    * Creates an Interface instance from an ABI
    */
   abstract createInterface(abi: unknown): ContractInterface
+
+  /**
+   * Grants the required roles to the specified Vault relayer.
+   * Framework-agnostic method that delegates contract instantiation and calling to the adapter.
+   *
+   * @param authorizerAddress The address of the Vault authorizer contract that manages access.
+   * @param authorizerAbi The ABI of the authorizer contract.
+   * @param vaultAddress The address to the Vault.
+   * @param vaultRelayerAddress The address to the GPv2 Vault relayer contract.
+   * @param contractCall Function to execute the contract call (provided by the adapter).
+   */
+  abstract grantRequiredRoles(
+    authorizerAddress: string,
+    authorizerAbi: Abi,
+    vaultAddress: string,
+    vaultRelayerAddress: string,
+    contractCall: (address: string, abi: Abi, functionName: string, args: unknown[]) => Promise<void>,
+  ): Promise<void>
 }

@@ -1,4 +1,4 @@
-import { getGlobalAdapter, type Abi, type Address } from '@cowprotocol/common'
+import { getGlobalAdapter, type Abi, type Address } from '@cowprotocol/sdk-common'
 
 /**
  * The salt used when deterministically deploying smart contracts.
@@ -66,11 +66,12 @@ export type MaybeNamedArtifactArtifactDeployment<C> = C extends ContractName
  * @returns The address that is expected to store the deployed code.
  */
 export function deterministicDeploymentAddress<C>(
-  { abi, bytecode }: MaybeNamedArtifactArtifactDeployment<C>,
+  { bytecode }: MaybeNamedArtifactArtifactDeployment<C>,
   deploymentArguments: DeploymentArguments<C>,
 ): Address {
   const adapter = getGlobalAdapter()
-  const deployData = adapter.utils.hexConcat([bytecode, adapter.utils.encodeDeploy(deploymentArguments, abi as Abi)])
 
-  return adapter.utils.getCreate2Address(DEPLOYER_CONTRACT, SALT, adapter.utils.keccak256(deployData))
+  const bytecodeHash = adapter.utils.keccak256(adapter.utils.hexConcat([bytecode, ...deploymentArguments]))
+
+  return adapter.utils.getCreate2Address(DEPLOYER_CONTRACT, SALT, bytecodeHash)
 }

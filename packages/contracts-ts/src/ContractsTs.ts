@@ -1,4 +1,4 @@
-import { AbstractProviderAdapter, setGlobalAdapter } from '@cowprotocol/common'
+import { AbstractProviderAdapter, setGlobalAdapter } from '@cowprotocol/sdk-common'
 import {
   hashify,
   normalizeBuyTokenBalance,
@@ -15,14 +15,8 @@ import {
 import { deterministicDeploymentAddress } from './deploy'
 import { normalizeInteraction, normalizeInteractions } from './interaction'
 import { implementationAddress, ownerAddress, proxyInterface } from './proxy'
-import {
-  decodeEip1271SignatureData,
-  EIP1271_MAGICVALUE,
-  encodeEip1271SignatureData,
-  SigningScheme,
-  signOrder,
-} from './sign'
-import { getVaultInterface, grantRequiredRoles } from './vault'
+import { decodeEip1271SignatureData, encodeEip1271SignatureData, signOrder } from './sign'
+import { grantRequiredRoles } from './vault'
 import {
   encodeSigningScheme,
   decodeSigningScheme,
@@ -82,12 +76,9 @@ export class ContractsTs {
   signOrder = signOrder
   encodeEip1271SignatureData = encodeEip1271SignatureData
   decodeEip1271SignatureData = decodeEip1271SignatureData
-  EIP1271_MAGICVALUE = EIP1271_MAGICVALUE
-  SigningScheme = SigningScheme
 
   //vault
   grantRequiredRoles = grantRequiredRoles
-  getVaultInterface = getVaultInterface
 
   //settlement
   encodeSigningScheme = encodeSigningScheme

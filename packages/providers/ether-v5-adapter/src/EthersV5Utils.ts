@@ -128,4 +128,38 @@ export class EthersV5Utils implements AdapterUtils {
   solidityKeccak256(types: string[], values: unknown[]): unknown {
     return ethers.utils.solidityKeccak256(types, values)
   }
+
+  async grantRequiredRoles(
+    authorizerAddress: string,
+    authorizerAbi: Abi,
+    vaultAddress: string,
+    vaultRelayerAddress: string,
+    contractCall: (address: string, abi: Abi, functionName: string, args: unknown[]) => Promise<void>,
+  ): Promise<void> {
+    /**
+     * Balancer Vault partial ABI interface.
+     *
+     * This definition only contains the Vault methods that are used by GPv2 Vault
+     * relayer. It is copied here to avoid relying on build artifacts.
+     */
+    const vaultAbi = [
+      'function manageUserBalance((uint8, address, uint256, address, address)[])',
+      'function batchSwap(uint8, (bytes32, uint256, uint256, uint256, bytes)[], address[], (address, bool, address, bool), int256[], uint256)',
+    ]
+
+    // Create interface using ethers utils
+    const vaultInterface = new ethers.utils.Interface(vaultAbi)
+
+    // Iterate through all functions in the interface
+    for (const name in vaultInterface.functions) {
+      // Get function selector (first 4 bytes of function signature hash)
+      const functionSelector = vaultInterface.getSighash(name)
+
+      // Compute role hash using solidityKeccak256
+      const roleHash = ethers.utils.solidityKeccak256(['uint256', 'bytes4'], [vaultAddress, functionSelector])
+
+      // Call grantRole on the authorizer contract
+      await contractCall(authorizerAddress, authorizerAbi, 'grantRole', [roleHash, vaultRelayerAddress])
+    }
+  }
 }

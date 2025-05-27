@@ -1,5 +1,6 @@
-import { Bytes, getGlobalAdapter, SignatureLike, Signer, TypedDataDomain, TypedDataTypes } from '@cowprotocol/common'
-import { ORDER_TYPE_FIELDS, Order, normalizeOrder } from './order'
+import { Bytes, getGlobalAdapter, Signer, TypedDataDomain, TypedDataTypes } from '@cowprotocol/sdk-common'
+import { ORDER_TYPE_FIELDS, normalizeOrder } from './order'
+import { EcdsaSigningScheme, SigningScheme, Order, EcdsaSignature } from './types'
 
 /**
  * Value returned by a call to `isValidSignature` if the signature was verified
@@ -7,55 +8,6 @@ import { ORDER_TYPE_FIELDS, Order, normalizeOrder } from './order'
  * bytes4(keccak256("isValidSignature(bytes32,bytes)"))
  */
 export const EIP1271_MAGICVALUE = '0x1626ba7e'
-
-/**
- * The signing scheme used to sign the order.
- */
-export enum SigningScheme {
-  /**
-   * The EIP-712 typed data signing scheme. This is the preferred scheme as it
-   * provides more infomation to wallets performing the signature on the data
-   * being signed.
-   *
-   * <https://github.com/ethereum/EIPs/blob/master/EIPS/eip-712.md#definition-of-domainseparator>
-   */
-  EIP712 = 0b00,
-  /**
-   * Message signed using eth_sign RPC call.
-   */
-  ETHSIGN = 0b01,
-  /**
-   * Smart contract signatures as defined in EIP-1271.
-   *
-   * <https://eips.ethereum.org/EIPS/eip-1271>
-   */
-  EIP1271 = 0b10,
-  /**
-   * Pre-signed order.
-   */
-  PRESIGN = 0b11,
-}
-
-export type EcdsaSigningScheme = SigningScheme.EIP712 | SigningScheme.ETHSIGN
-
-/**
- * The signature of an order.
- */
-export type Signature = EcdsaSignature | Eip1271Signature | PreSignSignature
-
-/**
- * ECDSA signature of an order.
- */
-export interface EcdsaSignature {
-  /**
-   * The signing scheme used in the signature.
-   */
-  scheme: EcdsaSigningScheme
-  /**
-   * The ECDSA signature.
-   */
-  data: SignatureLike
-}
 
 /**
  * EIP-1271 signature data.
@@ -160,7 +112,8 @@ export async function signOrder(
  * @param signature The EIP-1271 signature data to encode.
  */
 export function encodeEip1271SignatureData({ verifier, signature }: Eip1271SignatureData): string {
-  return getGlobalAdapter().utils.solidityPack(['address', 'bytes'], [verifier, signature])
+  const adapter = getGlobalAdapter()
+  return adapter.utils.solidityPack(['address', 'bytes'], [adapter.utils.getChecksumAddress(verifier), signature])
 }
 
 /**
@@ -178,6 +131,6 @@ export function decodeEip1271SignatureData(signature: Bytes): Eip1271SignatureDa
   const verifier = adapter.utils.getChecksumAddress(adapter.utils.hexlify(arrayifiedSignature.slice(0, 20)))
   return {
     verifier,
-    signature: arrayifiedSignature.slice(20),
+    signature: adapter.utils.hexlify(arrayifiedSignature.slice(20)),
   }
 }

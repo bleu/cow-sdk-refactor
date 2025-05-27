@@ -1,5 +1,5 @@
 import { Log, Signer, TypedDataDomain, TypedDataField } from 'ethers'
-import { AbstractSigner, TransactionParams, TransactionResponse } from '@cowprotocol/common'
+import { AbstractSigner, TransactionParams, TransactionResponse } from '@cowprotocol/sdk-common'
 
 export class EthersV6SignerAdapter extends AbstractSigner {
   private _signer: Signer

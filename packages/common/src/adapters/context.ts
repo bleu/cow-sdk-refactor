@@ -21,7 +21,7 @@ export class AdapterContext {
   public getAdapter(): AbstractProviderAdapter {
     if (!this._adapter) {
       throw new Error(
-        'Provider adapter is not congigurated. Configure with CowSdk or using AdapterContext.getInstance().setAdapter()',
+        'Provider adapter is not configurated. Configure with CowSdk or using AdapterContext.getInstance().setAdapter()',
       )
     }
     return this._adapter
@@ -35,5 +35,6 @@ export function getGlobalAdapter(): AbstractProviderAdapter {
 
 // Utility to set the global adapter
 export function setGlobalAdapter(adapter: AbstractProviderAdapter): void {
-  AdapterContext.getInstance().setAdapter(adapter)
+  const instance = AdapterContext.getInstance()
+  instance.setAdapter(adapter)
 }
