@@ -69,64 +69,65 @@ describe('SettlementEncoder', () => {
 
   describe('settlement encoding consistency', () => {
     test('should consistently encode settlements across different adapters', async () => {
-      // Setup signers for each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
+      // Setup wallets for each adapter (following the same pattern as contracts)
       const ethersV5Provider = new ethersV5.providers.JsonRpcProvider(TEST_RPC_URL)
-      const ethersV5Wallet = new ethersV5.Wallet(TEST_PRIVATE_KEY, ethersV5Provider)
-
-      setGlobalAdapter(adapters.ethersV6Adapter)
       const ethersV6Provider = new ethersV6.JsonRpcProvider(TEST_RPC_URL)
-      const ethersV6Wallet = new ethersV6.Wallet(TEST_PRIVATE_KEY, ethersV6Provider)
-
-      setGlobalAdapter(adapters.viemAdapter)
       const viemAccount = privateKeyToAccount(TEST_PRIVATE_KEY as `0x${string}`)
-      const walletClient = createWalletClient({
-        chain: sepolia,
-        transport: http(),
-        account: viemAccount,
-      })
+
+      const wallets = {
+        ethersV5Adapter: new ethersV5.Wallet(TEST_PRIVATE_KEY, ethersV5Provider),
+        ethersV6Adapter: new ethersV6.Wallet(TEST_PRIVATE_KEY, ethersV6Provider),
+        viemAdapter: createWalletClient({
+          chain: sepolia,
+          transport: http(),
+          account: viemAccount,
+        }),
+      }
 
       // Create encoders for each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Encoder = new SettlementEncoder(testDomain)
-
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Encoder = new SettlementEncoder(testDomain)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemEncoder = new SettlementEncoder(testDomain)
+      const encoders: Record<string, SettlementEncoder> = {}
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        encoders[adapterName] = new SettlementEncoder(testDomain)
+      }
 
       // Add the same interactions to each encoder
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      ethersV5Encoder.encodeInteraction(testInteraction, InteractionStage.PRE)
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      ethersV6Encoder.encodeInteraction(testInteraction, InteractionStage.PRE)
-      setGlobalAdapter(adapters.viemAdapter)
-      viemEncoder.encodeInteraction(testInteraction, InteractionStage.PRE)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        encoders[adapterName]!.encodeInteraction(testInteraction, InteractionStage.PRE)
+      }
 
       // Add the same trades to each encoder
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      await ethersV5Encoder.signEncodeTrade(testOrder, ethersV5Wallet, SigningScheme.EIP712, tradeExecution)
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      await ethersV6Encoder.signEncodeTrade(testOrder, ethersV6Wallet, SigningScheme.EIP712, tradeExecution)
-      setGlobalAdapter(adapters.viemAdapter)
-      await viemEncoder.signEncodeTrade(testOrder, walletClient, SigningScheme.EIP712, tradeExecution)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        await encoders[adapterName]!.signEncodeTrade(
+          testOrder,
+          wallets[adapterName],
+          SigningScheme.EIP712,
+          tradeExecution,
+        )
+      }
 
       // Get the encoded settlements
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Settlement = ethersV5Encoder.encodedSettlement(testPrices)
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Settlement = ethersV6Encoder.encodedSettlement(testPrices)
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemSettlement = viemEncoder.encodedSettlement(testPrices)
+      const settlements: any[] = []
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const settlement = encoders[adapterName]!.encodedSettlement(testPrices)
+        settlements.push(settlement)
+      }
 
       // Compare the token addresses
-      expect(ethersV5Settlement[0]).toEqual(ethersV6Settlement[0])
-      expect(ethersV5Settlement[0]).toEqual(viemSettlement[0])
+      const [firstSettlement, ...remainingSettlements] = settlements
+      remainingSettlements.forEach((settlement) => {
+        expect(settlement[0]).toEqual(firstSettlement[0])
+      })
 
       // Compare the clearing prices
-      expect(ethersV5Settlement[1]).toEqual(ethersV6Settlement[1])
-      expect(ethersV5Settlement[1]).toEqual(viemSettlement[1])
+      remainingSettlements.forEach((settlement) => {
+        expect(settlement[1]).toEqual(firstSettlement[1])
+      })
 
       // Compare the encoded trades
       // Note: We can't directly compare signature data which may differ by adapter,
@@ -143,8 +144,9 @@ describe('SettlementEncoder', () => {
         }
       }
 
-      compareTrades(ethersV5Settlement[2], ethersV6Settlement[2])
-      compareTrades(ethersV5Settlement[2], viemSettlement[2])
+      remainingSettlements.forEach((settlement) => {
+        compareTrades(firstSettlement[2], settlement[2])
+      })
 
       // Compare the interactions
       const compareInteractions = (interactions1: any[], interactions2: any[]) => {
@@ -155,15 +157,18 @@ describe('SettlementEncoder', () => {
       }
 
       // Compare all interaction stages
-      for (let i = 0; i < 3; i++) {
-        compareInteractions(ethersV5Settlement[3][i]!, ethersV6Settlement[3][i]!)
-        compareInteractions(ethersV5Settlement[3][i]!, viemSettlement[3][i]!)
-      }
+      remainingSettlements.forEach((settlement) => {
+        for (let i = 0; i < 3; i++) {
+          compareInteractions(firstSettlement[3][i]!, settlement[3][i]!)
+        }
+      })
     })
   })
 
   describe('encodedSetup', () => {
     test('should consistently encode setup interactions across different adapters', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
       // Test multiple interactions
       const interactions = [
         {
@@ -178,68 +183,53 @@ describe('SettlementEncoder', () => {
       ]
 
       // Encode setup with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Setup = SettlementEncoder.encodedSetup(...interactions)
+      const setups: any[] = []
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const setup = SettlementEncoder.encodedSetup(...interactions)
+        setups.push(setup)
+      }
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Setup = SettlementEncoder.encodedSetup(...interactions)
+      // Compare results - all should be identical
+      const [firstSetup, ...remainingSetups] = setups
+      remainingSetups.forEach((setup) => {
+        expect(JSON.stringify(setup)).toEqual(JSON.stringify(firstSetup))
+      })
 
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemSetup = SettlementEncoder.encodedSetup(...interactions)
-
-      // Compare results - token arrays should be empty
-      expect(ethersV5Setup[0]).toEqual([])
-      expect(ethersV6Setup[0]).toEqual([])
-      expect(viemSetup[0]).toEqual([])
+      // Verify structure - token arrays should be empty
+      expect(firstSetup[0]).toEqual([])
 
       // Prices should be empty
-      expect(ethersV5Setup[1]).toEqual([])
-      expect(ethersV6Setup[1]).toEqual([])
-      expect(viemSetup[1]).toEqual([])
+      expect(firstSetup[1]).toEqual([])
 
       // Trades should be empty
-      expect(ethersV5Setup[2]).toEqual([])
-      expect(ethersV6Setup[2]).toEqual([])
-      expect(viemSetup[2]).toEqual([])
+      expect(firstSetup[2]).toEqual([])
 
       // Compare interactions - they should be in the INTRA stage (index 1)
-      expect(ethersV5Setup[3][0]).toEqual([])
-      expect(ethersV5Setup[3][2]).toEqual([])
-      expect(ethersV6Setup[3][0]).toEqual([])
-      expect(ethersV6Setup[3][2]).toEqual([])
-      expect(viemSetup[3][0]).toEqual([])
-      expect(viemSetup[3][2]).toEqual([])
+      expect(firstSetup[3][0]).toEqual([])
+      expect(firstSetup[3][2]).toEqual([])
 
       // The INTRA interactions should match our input
-      expect(ethersV5Setup[3][1].length).toEqual(interactions.length)
-      expect(ethersV6Setup[3][1].length).toEqual(interactions.length)
-      expect(viemSetup[3][1].length).toEqual(interactions.length)
+      expect(firstSetup[3][1].length).toEqual(interactions.length)
 
       // Verify each interaction was encoded correctly
       for (let i = 0; i < interactions.length; i++) {
-        expect(ethersV5Setup[3][1][i]!.target).toEqual(interactions[i]!.target)
-        expect(ethersV5Setup[3][1][i]!.callData).toEqual(interactions[i]!.callData)
-        expect(ethersV6Setup[3][1][i]!.target).toEqual(interactions[i]!.target)
-        expect(ethersV6Setup[3][1][i]!.callData).toEqual(interactions[i]!.callData)
-        expect(viemSetup[3][1][i]!.target).toEqual(interactions[i]!.target)
-        expect(viemSetup[3][1][i]!.callData).toEqual(interactions[i]!.callData)
+        expect(firstSetup[3][1][i]!.target).toEqual(interactions[i]!.target)
+        expect(firstSetup[3][1][i]!.callData).toEqual(interactions[i]!.callData)
       }
-
-      // Results from different adapters should match
-      expect(JSON.stringify(ethersV5Setup)).toEqual(JSON.stringify(ethersV6Setup))
-      expect(JSON.stringify(ethersV5Setup)).toEqual(JSON.stringify(viemSetup))
     })
   })
 
   describe('clearingPrices', () => {
     test('should correctly extract clearing prices', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
       const testTokens = [
         '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // WETH
         '0x6B175474E89094C44Da98b954EedeAC495271d0F', // DAI
       ]
 
-      // Create an encoder and manually set tokens
-      setGlobalAdapter(adapters.ethersV5Adapter)
+      // Create an encoder and manually set tokens (using first adapter)
+      setGlobalAdapter(adapters[adapterNames[0]!])
       const encoder = new SettlementEncoder(testDomain)
 
       // Add orders that use these tokens
@@ -262,8 +252,10 @@ describe('SettlementEncoder', () => {
     })
 
     test('should throw when missing prices', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
       // Create an encoder with incomplete price data
-      setGlobalAdapter(adapters.ethersV5Adapter)
+      setGlobalAdapter(adapters[adapterNames[0]!])
       const encoder = new SettlementEncoder(testDomain)
 
       // Add an order that uses WETH and DAI
@@ -288,8 +280,10 @@ describe('SettlementEncoder', () => {
 
   describe('encodeOrderRefunds', () => {
     test('should correctly encode order refunds', () => {
-      // Create realistic order UIDs
-      setGlobalAdapter(adapters.ethersV5Adapter)
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
+      // Create realistic order UIDs (using first adapter)
+      setGlobalAdapter(adapters[adapterNames[0]!])
       const key = (1).toString(16).padStart(2, '0')
       const orderUids = [
         contracts.ethersV5Contracts.packOrderUidParams({
@@ -329,7 +323,9 @@ describe('SettlementEncoder', () => {
     })
 
     test('should throw with invalid order UIDs', () => {
-      setGlobalAdapter(adapters.ethersV5Adapter)
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
+      setGlobalAdapter(adapters[adapterNames[0]!])
       const encoder = new SettlementEncoder(testDomain)
 
       // Create invalid order UID (wrong length)

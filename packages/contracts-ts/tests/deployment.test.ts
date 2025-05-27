@@ -56,21 +56,23 @@ describe('Deployment and Proxy', () => {
       ] as [string, string]
 
       // Compute deployment address with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Address = deterministicDeploymentAddress(testArtifact, deployArgs)
+      const addresses: string[] = []
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Address = deterministicDeploymentAddress(testArtifact, deployArgs)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const address = deterministicDeploymentAddress(testArtifact, deployArgs)
+        addresses.push(address)
+      }
 
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemAddress = deterministicDeploymentAddress(testArtifact, deployArgs)
-
-      // Addresses should be identical
-      expect(ethersV5Address).toEqual(ethersV6Address)
-      expect(ethersV5Address).toEqual(viemAddress)
+      // All addresses should be identical
+      const [firstAddress, ...remainingAddresses] = addresses
+      remainingAddresses.forEach((address) => {
+        expect(address).toEqual(firstAddress)
+      })
 
       // Verify the address is a valid Ethereum address
-      expect(ethersV5Address).toMatch(/^0x[0-9a-f]{40}$/i)
+      expect(firstAddress).toMatch(/^0x[0-9a-f]{40}$/i)
 
       // Check that we're actually using the SALT and DEPLOYER_CONTRACT constants
       // by mocking an alternate implementation and ensuring results differ
@@ -85,7 +87,7 @@ describe('Deployment and Proxy', () => {
         const mockedAddress = deterministicDeploymentAddress(testArtifact, deployArgs)
 
         // Address should be different with the mocked hash function
-        expect(mockedAddress).not.toEqual(ethersV5Address)
+        expect(mockedAddress).not.toEqual(firstAddress)
 
         // The mockHashFunction should be called with data containing the SALT
         expect(mockHashFunction).toHaveBeenCalled()
@@ -155,99 +157,83 @@ describe('Deployment and Proxy', () => {
       }
 
       // Test implementation address with different adapters
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5ImplementationPromise = implementationAddress(mockProvider as any, proxyAddress)
+      const implementationPromises: Promise<string>[] = []
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6ImplementationPromise = implementationAddress(mockProvider as any, proxyAddress)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemImplementationPromise = implementationAddress(mockProvider as any, proxyAddress)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        implementationPromises.push(implementationAddress(mockProvider as any, proxyAddress))
+      }
 
       // All calls should resolve to the same address
-      const [ethersV5Implementation, ethersV6Implementation, viemImplementation] = await Promise.all([
-        ethersV5ImplementationPromise,
-        ethersV6ImplementationPromise,
-        viemImplementationPromise,
-      ])
-
-      expect(ethersV5Implementation).toEqual(ethersV6Implementation)
-      expect(ethersV5Implementation).toEqual(viemImplementation)
+      const implementations = await Promise.all(implementationPromises)
+      const [firstImplementation, ...remainingImplementations] = implementations
+      remainingImplementations.forEach((implementation) => {
+        expect(implementation).toEqual(firstImplementation)
+      })
 
       // Test owner address
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5OwnerPromise = ownerAddress(mockProvider as any, proxyAddress)
+      const ownerPromises: Promise<string>[] = []
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6OwnerPromise = ownerAddress(mockProvider as any, proxyAddress)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemOwnerPromise = ownerAddress(mockProvider as any, proxyAddress)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        ownerPromises.push(ownerAddress(mockProvider as any, proxyAddress))
+      }
 
       // All calls should resolve to the same address
-      const [ethersV5Owner, ethersV6Owner, viemOwner] = await Promise.all([
-        ethersV5OwnerPromise,
-        ethersV6OwnerPromise,
-        viemOwnerPromise,
-      ])
-
-      expect(ethersV5Owner).toEqual(ethersV6Owner)
-      expect(ethersV5Owner).toEqual(viemOwner)
-      expect(ethersV5Owner).toEqual(TEST_ADDRESS)
+      const owners = await Promise.all(ownerPromises)
+      const [firstOwner, ...remainingOwners] = owners
+      remainingOwners.forEach((owner) => {
+        expect(owner).toEqual(firstOwner)
+      })
+      expect(firstOwner).toEqual(TEST_ADDRESS)
     })
 
     test('should create proxy interfaces consistently', () => {
       // Mock getContract implementations for each adapter
-      const originalEthersV5GetContract = adapters.ethersV5Adapter.getContract
-      const originalEthersV6GetContract = adapters.ethersV6Adapter.getContract
-      const originalViemGetContract = adapters.viemAdapter.getContract
+      const originalGetContracts = {} as Record<keyof typeof adapters, any>
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
+      // Store original functions and mock them
+      for (const adapterName of adapterNames) {
+        originalGetContracts[adapterName] = adapters[adapterName].getContract
+      }
 
       const mockContract = { address: '0x1234567890123456789012345678901234567890' }
       const mockProxyContract = { mock: 'proxy-interface' }
 
-      adapters.ethersV5Adapter.getContract = jest.fn().mockReturnValue(mockProxyContract)
-      adapters.ethersV6Adapter.getContract = jest.fn().mockReturnValue(mockProxyContract)
-      adapters.viemAdapter.getContract = jest.fn().mockReturnValue(mockProxyContract)
+      for (const adapterName of adapterNames) {
+        adapters[adapterName].getContract = jest.fn().mockReturnValue(mockProxyContract)
+      }
 
       try {
         // Get proxy interface with each adapter
-        setGlobalAdapter(adapters.ethersV5Adapter)
-        const ethersV5Proxy = proxyInterface(mockContract as any)
+        const proxyInterfaces = []
 
-        setGlobalAdapter(adapters.ethersV6Adapter)
-        const ethersV6Proxy = proxyInterface(mockContract as any)
+        for (const adapterName of adapterNames) {
+          setGlobalAdapter(adapters[adapterName])
+          const proxyInterfaceResult = proxyInterface(mockContract as any)
+          proxyInterfaces.push(proxyInterfaceResult)
+        }
 
-        setGlobalAdapter(adapters.viemAdapter)
-        const viemProxy = proxyInterface(mockContract as any)
+        // All interfaces should be the same mock object
+        proxyInterfaces.forEach((proxyInterfaceResult) => {
+          expect(proxyInterfaceResult).toEqual(mockProxyContract)
+        })
 
-        // Interfaces should be the same mock object
-        expect(ethersV5Proxy).toEqual(mockProxyContract)
-        expect(ethersV6Proxy).toEqual(mockProxyContract)
-        expect(viemProxy).toEqual(mockProxyContract)
-
-        // Verify getContract was called with the right arguments
-        expect(adapters.ethersV5Adapter.getContract).toHaveBeenCalledWith(
-          mockContract.address,
-          expect.anything(),
-          undefined,
-        )
-
-        expect(adapters.ethersV6Adapter.getContract).toHaveBeenCalledWith(
-          mockContract.address,
-          expect.anything(),
-          undefined,
-        )
-
-        expect(adapters.viemAdapter.getContract).toHaveBeenCalledWith(
-          mockContract.address,
-          expect.anything(),
-          undefined,
-        )
+        // Verify getContract was called with the right arguments for each adapter
+        for (const adapterName of adapterNames) {
+          expect(adapters[adapterName].getContract).toHaveBeenCalledWith(
+            mockContract.address,
+            expect.anything(),
+            undefined,
+          )
+        }
       } finally {
         // Restore original functions
-        adapters.ethersV5Adapter.getContract = originalEthersV5GetContract
-        adapters.ethersV6Adapter.getContract = originalEthersV6GetContract
-        adapters.viemAdapter.getContract = originalViemGetContract
+        for (const adapterName of adapterNames) {
+          adapters[adapterName].getContract = originalGetContracts[adapterName]
+        }
       }
     })
   })

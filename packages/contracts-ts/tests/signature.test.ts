@@ -32,6 +32,8 @@ describe('Interactions and EIP-1271 Signatures', () => {
 
   describe('normalizeInteraction', () => {
     test('should normalize interactions consistently across different adapters', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
       // Test cases
       const testCases: InteractionLike[] = [
         {
@@ -53,30 +55,33 @@ describe('Interactions and EIP-1271 Signatures', () => {
       ]
 
       for (const testCase of testCases) {
+        const normalizedResults: any[] = []
+
         // Normalize with each adapter
-        setGlobalAdapter(adapters.ethersV5Adapter)
-        const ethersV5Normalized = normalizeInteraction(testCase)
+        for (const adapterName of adapterNames) {
+          setGlobalAdapter(adapters[adapterName])
+          const normalized = normalizeInteraction(testCase)
+          normalizedResults.push(normalized)
+        }
 
-        setGlobalAdapter(adapters.ethersV6Adapter)
-        const ethersV6Normalized = normalizeInteraction(testCase)
-
-        setGlobalAdapter(adapters.viemAdapter)
-        const viemNormalized = normalizeInteraction(testCase)
-
-        // Normalized interactions should be identical
-        expect(ethersV5Normalized).toEqual(ethersV6Normalized)
-        expect(ethersV5Normalized).toEqual(viemNormalized)
+        // All normalized interactions should be identical
+        const [firstNormalized, ...remainingNormalized] = normalizedResults
+        remainingNormalized.forEach((normalized) => {
+          expect(normalized).toEqual(firstNormalized)
+        })
 
         // Verify defaults were applied
-        expect(ethersV5Normalized.target).toEqual(testCase.target)
-        expect(ethersV5Normalized.callData).toEqual(testCase.callData || '0x')
-        expect(ethersV5Normalized.value).toEqual(testCase.value || 0)
+        expect(firstNormalized.target).toEqual(testCase.target)
+        expect(firstNormalized.callData).toEqual(testCase.callData || '0x')
+        expect(firstNormalized.value).toEqual(testCase.value || 0)
       }
     })
   })
 
   describe('normalizeInteractions', () => {
     test('should normalize multiple interactions consistently', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
       // Test batch of interactions
       const interactions: InteractionLike[] = [
         {
@@ -92,33 +97,36 @@ describe('Interactions and EIP-1271 Signatures', () => {
         },
       ]
 
+      const normalizedResults: any[] = []
+
       // Normalize batch with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Normalized = normalizeInteractions(interactions)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const normalized = normalizeInteractions(interactions)
+        normalizedResults.push(normalized)
+      }
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Normalized = normalizeInteractions(interactions)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemNormalized = normalizeInteractions(interactions)
-
-      // Normalized interactions should be identical
-      expect(ethersV5Normalized).toEqual(ethersV6Normalized)
-      expect(ethersV5Normalized).toEqual(viemNormalized)
+      // All normalized interactions should be identical
+      const [firstNormalized, ...remainingNormalized] = normalizedResults
+      remainingNormalized.forEach((normalized) => {
+        expect(normalized).toEqual(firstNormalized)
+      })
 
       // Verify length and content
-      expect(ethersV5Normalized.length).toEqual(interactions.length)
+      expect(firstNormalized.length).toEqual(interactions.length)
 
       for (let i = 0; i < interactions.length; i++) {
-        expect(ethersV5Normalized[i]!.target).toEqual(interactions[i]!.target)
-        expect(ethersV5Normalized[i]!.callData).toEqual(interactions[i]!.callData || '0x')
-        expect(ethersV5Normalized[i]!.value).toEqual(interactions[i]!.value || 0)
+        expect(firstNormalized[i]!.target).toEqual(interactions[i]!.target)
+        expect(firstNormalized[i]!.callData).toEqual(interactions[i]!.callData || '0x')
+        expect(firstNormalized[i]!.value).toEqual(interactions[i]!.value || 0)
       }
     })
   })
 
   describe('EIP-1271 signature encoding/decoding', () => {
     test('should encode and decode EIP-1271 signatures consistently', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
       // Test signature data
       const signatureData: Eip1271SignatureData = {
         verifier: '0x9008D19f58AAbD9eD0D60971565AA8510560ab41',
@@ -126,34 +134,33 @@ describe('Interactions and EIP-1271 Signatures', () => {
           '0x29a674dfc87f8c78fc2bfbcbe8ffdd435091a6a84bc7761db72a45da453d73ac41c5ce28eceb34be73fddc12a5d04af6e736405e41b613aeefeed3db8122420c1b',
       }
 
+      const encodedResults: string[] = []
+      const decodedResults: Eip1271SignatureData[] = []
+
       // Encode with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Encoded = encodeEip1271SignatureData(signatureData)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const encoded = encodeEip1271SignatureData(signatureData)
+        encodedResults.push(encoded)
+      }
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Encoded = encodeEip1271SignatureData(signatureData)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemEncoded = encodeEip1271SignatureData(signatureData)
-
-      // Encoded signatures should be identical
-      expect(ethersV5Encoded).toEqual(ethersV6Encoded)
-      expect(ethersV5Encoded).toEqual(viemEncoded)
+      // All encoded signatures should be identical
+      const [firstEncoded, ...remainingEncoded] = encodedResults
+      remainingEncoded.forEach((encoded) => {
+        expect(encoded).toEqual(firstEncoded)
+      })
 
       // Decode with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Decoded = decodeEip1271SignatureData(ethersV5Encoded)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const decoded = decodeEip1271SignatureData(firstEncoded)
+        decodedResults.push(decoded)
+      }
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Decoded = decodeEip1271SignatureData(ethersV6Encoded)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemDecoded = decodeEip1271SignatureData(viemEncoded)
-
-      // Decoded signatures should be identical and match input
-      expect(ethersV5Decoded).toEqual(signatureData)
-      expect(ethersV6Decoded).toEqual(signatureData)
-      expect(viemDecoded).toEqual(signatureData)
+      // All decoded signatures should be identical and match input
+      decodedResults.forEach((decoded) => {
+        expect(decoded).toEqual(signatureData)
+      })
 
       // Test with different signature lengths
       const signatures = [
@@ -168,18 +175,35 @@ describe('Interactions and EIP-1271 Signatures', () => {
           signature,
         }
 
-        // Encode and decode with each adapter
-        setGlobalAdapter(adapters.ethersV5Adapter)
-        const encoded = encodeEip1271SignatureData(testData)
-        const decoded = decodeEip1271SignatureData(encoded)
+        // Encode and decode with each adapter and verify consistency
+        const encodeResults: string[] = []
+        const decodeResults: Eip1271SignatureData[] = []
 
-        // Decoded data should match input
-        expect(decoded.verifier).toEqual(testData.verifier)
-        expect(decoded.signature).toEqual(testData.signature)
+        for (const adapterName of adapterNames) {
+          setGlobalAdapter(adapters[adapterName])
+          const encoded = encodeEip1271SignatureData(testData)
+          const decoded = decodeEip1271SignatureData(encoded)
+          encodeResults.push(encoded)
+          decodeResults.push(decoded)
+        }
+
+        // All encoded results should be identical
+        const [firstEncode, ...remainingEncode] = encodeResults
+        remainingEncode.forEach((encoded) => {
+          expect(encoded).toEqual(firstEncode)
+        })
+
+        // All decoded results should be identical and match input
+        decodeResults.forEach((decoded) => {
+          expect(decoded.verifier).toEqual(testData.verifier)
+          expect(decoded.signature).toEqual(testData.signature)
+        })
       }
     })
 
     test('should handle different verifier address formats', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
       // Test with addresses in different formats (lowercase, uppercase, mixed)
       const verifiers = [
         '0x9008d19f58aabd9ed0d60971565aa8510560ab41', // lowercase
@@ -193,13 +217,28 @@ describe('Interactions and EIP-1271 Signatures', () => {
           signature: '0x1234',
         }
 
-        // Encode with ethersV5 adapter
-        setGlobalAdapter(adapters.ethersV5Adapter)
-        const encoded = encodeEip1271SignatureData(testData)
-        const decoded = decodeEip1271SignatureData(encoded)
+        const encodedResults: string[] = []
+        const decodedResults: Eip1271SignatureData[] = []
 
-        // Decoded verifier should be checksummed address
-        expect(decoded.verifier.toLowerCase()).toEqual(verifier.toLowerCase())
+        // Encode and decode with each adapter
+        for (const adapterName of adapterNames) {
+          setGlobalAdapter(adapters[adapterName])
+          const encoded = encodeEip1271SignatureData(testData)
+          const decoded = decodeEip1271SignatureData(encoded)
+          encodedResults.push(encoded)
+          decodedResults.push(decoded)
+        }
+
+        // All encoded results should be identical
+        const [firstEncoded, ...remainingEncoded] = encodedResults
+        remainingEncoded.forEach((encoded) => {
+          expect(encoded).toEqual(firstEncoded)
+        })
+
+        // All decoded verifiers should be consistent (lowercase comparison)
+        decodedResults.forEach((decoded) => {
+          expect(decoded.verifier.toLowerCase()).toEqual(verifier.toLowerCase())
+        })
       }
     })
 

@@ -112,7 +112,8 @@ export async function signOrder(
  * @param signature The EIP-1271 signature data to encode.
  */
 export function encodeEip1271SignatureData({ verifier, signature }: Eip1271SignatureData): string {
-  return getGlobalAdapter().utils.solidityPack(['address', 'bytes'], [verifier, signature])
+  const adapter = getGlobalAdapter()
+  return adapter.utils.solidityPack(['address', 'bytes'], [adapter.utils.getChecksumAddress(verifier), signature])
 }
 
 /**

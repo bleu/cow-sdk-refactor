@@ -60,102 +60,104 @@ describe('Order Hashing and Signing', () => {
 
   describe('hashOrder', () => {
     test('should hash orders consistently across different adapters', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+      const hashes: string[] = []
+
       // Hash order with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Hash = hashOrder(testDomain, testOrder)
-
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Hash = hashOrder(testDomain, testOrder)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemHash = hashOrder(testDomain, testOrder)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const hash = hashOrder(testDomain, testOrder)
+        hashes.push(hash)
+      }
 
       // All hashes should be identical
-      expect(ethersV5Hash).toEqual(ethersV6Hash)
-      expect(ethersV5Hash).toEqual(viemHash)
+      const [firstHash, ...remainingHashes] = hashes
+      remainingHashes.forEach((hash) => {
+        expect(hash).toEqual(firstHash)
+      })
 
       // Verify hash format (should be 0x-prefixed 32 byte hash)
-      expect(ethersV5Hash).toMatch(/^0x[0-9a-f]{64}$/i)
+      expect(firstHash).toMatch(/^0x[0-9a-f]{64}$/i)
     })
   })
 
   describe('computeOrderUid and extractOrderUidParams', () => {
     test('should compute and extract order UIDs consistently across different adapters', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+      const uids: string[] = []
+
       // Compute order UID with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Uid = computeOrderUid(testDomain, testOrder, TEST_ADDRESS)
-
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Uid = computeOrderUid(testDomain, testOrder, TEST_ADDRESS)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemUid = computeOrderUid(testDomain, testOrder, TEST_ADDRESS)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const uid = computeOrderUid(testDomain, testOrder, TEST_ADDRESS)
+        uids.push(uid)
+      }
 
       // All UIDs should be identical
-      expect(ethersV5Uid).toEqual(ethersV6Uid)
-      expect(ethersV5Uid).toEqual(viemUid)
+      const [firstUid, ...remainingUids] = uids
+      remainingUids.forEach((uid) => {
+        expect(uid).toEqual(firstUid)
+      })
 
       // Verify UID format (56 bytes)
-      expect(ethersV5Uid).toMatch(/^0x[0-9a-f]{112}$/i)
+      expect(firstUid).toMatch(/^0x[0-9a-f]{112}$/i)
 
-      // Extract parameters from the UID
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Params = extractOrderUidParams(ethersV5Uid)
-
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Params = extractOrderUidParams(ethersV6Uid)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemParams = extractOrderUidParams(viemUid)
+      // Extract parameters from the UID with each adapter
+      const extractedParams: any[] = []
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const params = extractOrderUidParams(firstUid!)
+        extractedParams.push(params)
+      }
 
       // All extracted parameters should be identical
-      expect(ethersV5Params).toEqual(ethersV6Params)
-      expect(ethersV5Params).toEqual(viemParams)
+      const [firstParams, ...remainingParams] = extractedParams
+      remainingParams.forEach((params) => {
+        expect(params).toEqual(firstParams)
+      })
 
       // Verify the extracted parameters match the input
-      expect(ethersV5Params.owner).toEqual(TEST_ADDRESS)
-      expect(ethersV5Params.validTo).toEqual(testOrder.validTo)
+      expect(firstParams.owner).toEqual(TEST_ADDRESS)
+      expect(firstParams.validTo).toEqual(testOrder.validTo)
 
       // The order digest should match the hash
-      setGlobalAdapter(adapters.ethersV5Adapter)
+      setGlobalAdapter(adapters[adapterNames[0]!])
       const orderHash = hashOrder(testDomain, testOrder)
-      expect(ethersV5Params.orderDigest).toEqual(orderHash)
+      expect(firstParams.orderDigest).toEqual(orderHash)
     })
   })
 
   describe('signOrder', () => {
     test('should sign orders consistently across different adapters', async () => {
-      // Setup signers for each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
+      // Setup wallets for each adapter (following the same pattern as contracts)
       const ethersV5Provider = new ethersV5.providers.JsonRpcProvider(TEST_RPC_URL)
-      const ethersV5Wallet = new ethersV5.Wallet(TEST_PRIVATE_KEY, ethersV5Provider)
-
-      setGlobalAdapter(adapters.ethersV6Adapter)
       const ethersV6Provider = new ethersV6.JsonRpcProvider(TEST_RPC_URL)
-      const ethersV6Wallet = new ethersV6.Wallet(TEST_PRIVATE_KEY, ethersV6Provider)
-
-      setGlobalAdapter(adapters.viemAdapter)
       const viemAccount = privateKeyToAccount(TEST_PRIVATE_KEY as `0x${string}`)
-      const walletClient = createWalletClient({
-        chain: sepolia,
-        transport: http(),
-        account: viemAccount,
-      })
+
+      const wallets = {
+        ethersV5Adapter: new ethersV5.Wallet(TEST_PRIVATE_KEY, ethersV5Provider),
+        ethersV6Adapter: new ethersV6.Wallet(TEST_PRIVATE_KEY, ethersV6Provider),
+        viemAdapter: createWalletClient({
+          chain: sepolia,
+          transport: http(),
+          account: viemAccount,
+        }),
+      }
 
       // Sign the order with each adapter
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Sig = await signOrder(testDomain, testOrder, ethersV5Wallet, SigningScheme.EIP712)
+      const signatures: Signature[] = []
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const sig = await signOrder(testDomain, testOrder, wallets[adapterName], SigningScheme.EIP712)
+        signatures.push(sig)
+      }
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Sig = await signOrder(testDomain, testOrder, ethersV6Wallet, SigningScheme.EIP712)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemSig = await signOrder(testDomain, testOrder, walletClient, SigningScheme.EIP712)
-
-      // Signatures should have the same scheme
-      expect(ethersV5Sig.scheme).toEqual(SigningScheme.EIP712)
-      expect(ethersV6Sig.scheme).toEqual(SigningScheme.EIP712)
-      expect(viemSig.scheme).toEqual(SigningScheme.EIP712)
+      // All signatures should have the same scheme
+      signatures.forEach((sig) => {
+        expect(sig.scheme).toEqual(SigningScheme.EIP712)
+      })
 
       // The signatures may differ slightly in format, but all should be valid ECDSA signatures
       const isValidSignature = (sig: Signature) => {
@@ -167,80 +169,79 @@ describe('Order Hashing and Signing', () => {
         }
       }
 
-      isValidSignature(ethersV5Sig)
-      isValidSignature(ethersV6Sig)
-      isValidSignature(viemSig)
+      signatures.forEach(isValidSignature)
     })
   })
 
   describe('SigningScheme encoding/decoding', () => {
     test('should encode and decode signing schemes consistently', () => {
       const schemes = [SigningScheme.EIP712, SigningScheme.ETHSIGN, SigningScheme.EIP1271, SigningScheme.PRESIGN]
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
 
       for (const scheme of schemes) {
+        const encodedValues: any[] = []
+        const decodedValues: any[] = []
+
         // For each adapter, encode the scheme
-        setGlobalAdapter(adapters.ethersV5Adapter)
-        const ethersV5Encoded = encodeSigningScheme(scheme)
+        for (const adapterName of adapterNames) {
+          setGlobalAdapter(adapters[adapterName])
+          const encoded = encodeSigningScheme(scheme)
+          encodedValues.push(encoded)
+        }
 
-        setGlobalAdapter(adapters.ethersV6Adapter)
-        const ethersV6Encoded = encodeSigningScheme(scheme)
+        // All encoded values should be the same
+        const [firstEncoded, ...remainingEncoded] = encodedValues
+        remainingEncoded.forEach((encoded) => {
+          expect(encoded).toEqual(firstEncoded)
+        })
 
-        setGlobalAdapter(adapters.viemAdapter)
-        const viemEncoded = encodeSigningScheme(scheme)
+        // Decode and verify with each adapter
+        for (const adapterName of adapterNames) {
+          setGlobalAdapter(adapters[adapterName])
+          const decoded = decodeSigningScheme(firstEncoded)
+          decodedValues.push(decoded)
+        }
 
-        // Encoded values should be the same
-        expect(ethersV5Encoded).toEqual(ethersV6Encoded)
-        expect(ethersV5Encoded).toEqual(viemEncoded)
-
-        // Decode and verify
-        setGlobalAdapter(adapters.ethersV5Adapter)
-        const ethersV5Decoded = decodeSigningScheme(ethersV5Encoded)
-
-        setGlobalAdapter(adapters.ethersV6Adapter)
-        const ethersV6Decoded = decodeSigningScheme(ethersV6Encoded)
-
-        setGlobalAdapter(adapters.viemAdapter)
-        const viemDecoded = decodeSigningScheme(viemEncoded)
-
-        // Decoded values should match the original scheme
-        expect(ethersV5Decoded).toEqual(scheme)
-        expect(ethersV6Decoded).toEqual(scheme)
-        expect(viemDecoded).toEqual(scheme)
+        // All decoded values should match the original scheme
+        decodedValues.forEach((decoded) => {
+          expect(decoded).toEqual(scheme)
+        })
       }
     })
   })
 
   describe('TradeFlags encoding/decoding', () => {
     test('should encode and decode trade flags consistently', () => {
+      const adapterNames = Object.keys(adapters) as Array<keyof typeof adapters>
+
       // Create trade flags for testing
       const tradeFlags = {
         ...testOrder,
         signingScheme: SigningScheme.EIP712,
       }
 
+      const encodedValues: any[] = []
+      const decodedValues: any[] = []
+
       // For each adapter, encode the flags
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Encoded = encodeTradeFlags(tradeFlags)
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const encoded = encodeTradeFlags(tradeFlags)
+        encodedValues.push(encoded)
+      }
 
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Encoded = encodeTradeFlags(tradeFlags)
+      // All encoded values should be the same
+      const [firstEncoded, ...remainingEncoded] = encodedValues
+      remainingEncoded.forEach((encoded) => {
+        expect(encoded).toEqual(firstEncoded)
+      })
 
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemEncoded = encodeTradeFlags(tradeFlags)
-
-      // Encoded values should be the same
-      expect(ethersV5Encoded).toEqual(ethersV6Encoded)
-      expect(ethersV5Encoded).toEqual(viemEncoded)
-
-      // Decode and verify
-      setGlobalAdapter(adapters.ethersV5Adapter)
-      const ethersV5Decoded = decodeTradeFlags(ethersV5Encoded)
-
-      setGlobalAdapter(adapters.ethersV6Adapter)
-      const ethersV6Decoded = decodeTradeFlags(ethersV6Encoded)
-
-      setGlobalAdapter(adapters.viemAdapter)
-      const viemDecoded = decodeTradeFlags(viemEncoded)
+      // Decode and verify with each adapter
+      for (const adapterName of adapterNames) {
+        setGlobalAdapter(adapters[adapterName])
+        const decoded = decodeTradeFlags(firstEncoded)
+        decodedValues.push(decoded)
+      }
 
       // Verify that all decoded properties match
       const checkFlags = (decoded: any) => {
@@ -249,9 +250,7 @@ describe('Order Hashing and Signing', () => {
         expect(decoded.signingScheme).toEqual(tradeFlags.signingScheme)
       }
 
-      checkFlags(ethersV5Decoded)
-      checkFlags(ethersV6Decoded)
-      checkFlags(viemDecoded)
+      decodedValues.forEach(checkFlags)
     })
   })
 })
