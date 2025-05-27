@@ -365,9 +365,6 @@ importers:
       '@cowprotocol/sdk-common':
         specifier: workspace:*
         version: link:../../common
-      '@cowprotocol/sdk-contracts-ts':
-        specifier: workspace:*
-        version: link:../../contracts-ts
       '@ethersproject/abstract-signer':
         specifier: ^5.8.0
         version: 5.8.0
@@ -399,9 +396,6 @@ importers:
       '@cowprotocol/sdk-common':
         specifier: workspace:*
         version: link:../../common
-      '@cowprotocol/sdk-contracts-ts':
-        specifier: workspace:*
-        version: link:../../contracts-ts
       ethers:
         specifier: ^6.13.7
         version: 6.14.1
