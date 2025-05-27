@@ -14,6 +14,7 @@ export * from './swap'
 export * from './vault'
 export * from './api'
 export * from './reader'
+export * from './signers'
 
 export { SigningScheme as ContractsSigningScheme, OrderKind as ContractsOrderKind } from './types'
 

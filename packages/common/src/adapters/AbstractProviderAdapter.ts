@@ -13,6 +13,9 @@ export abstract class AbstractProviderAdapter<T extends AdapterTypes = AdapterTy
 
   // eslint-disable-next-line
   public abstract Signer: new (signer: any) => AbstractSigner
+  public abstract TypedDataVersionedSigner: new (signer: any, version: any) => AbstractSigner
+  public abstract TypedDataV3Signer: new (signer: any) => AbstractSigner
+  public abstract IntChainIdTypedDataV4Signer: new (signer: any) => AbstractSigner
   public abstract utils: AdapterUtils
 
   // Core functionality

@@ -35,7 +35,12 @@ export interface EthersV6Types extends AdapterTypes {
   TypedDataTypes: Record<string, TypedDataField[]>
 }
 import { EthersV6Utils } from './EthersV6Utils'
-import { EthersV6SignerAdapter } from './EthersV6SignerAdapter'
+import {
+  EthersV6SignerAdapter,
+  IntChainIdTypedDataV4Signer,
+  TypedDataV3Signer,
+  TypedDataVersionedSigner,
+} from './EthersV6SignerAdapter'
 
 export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
   declare protected _type?: EthersV6Types
@@ -43,6 +48,9 @@ export class EthersV6Adapter extends AbstractProviderAdapter<EthersV6Types> {
   private provider: Provider
   private signer: Signer
   public Signer = EthersV6SignerAdapter
+  public TypedDataVersionedSigner = TypedDataVersionedSigner
+  public TypedDataV3Signer = TypedDataV3Signer
+  public IntChainIdTypedDataV4Signer = IntChainIdTypedDataV4Signer
   public utils: EthersV6Utils
 
   constructor(providerOrSigner: Provider | Signer) {
