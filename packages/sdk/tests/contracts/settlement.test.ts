@@ -5,9 +5,9 @@ import * as ethersV6 from 'ethers-v6'
 import { setGlobalAdapter } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
-  Order,
-  OrderKind,
-  SigningScheme,
+  ContractsOrder as Order,
+  ContractsOrderKind as OrderKind,
+  ContractsSigningScheme as SigningScheme,
   SettlementEncoder,
   InteractionStage,
   Prices,

@@ -6,7 +6,6 @@ import {
   ContractsTs,
   CONTRACT_NAMES,
   SALT,
-  DEPLOYER_CONTRACT,
   deterministicDeploymentAddress,
   proxyInterface,
   implementationAddress,

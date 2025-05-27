@@ -5,12 +5,12 @@ import * as ethersV6 from 'ethers-v6'
 import { setGlobalAdapter, TypedDataDomain } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
-  Order,
-  Signature,
+  ContractsOrder as Order,
+  ContractsSignature as Signature,
   Swap,
   SwapEncoder,
-  OrderKind,
-  SigningScheme,
+  ContractsOrderKind as OrderKind,
+  ContractsSigningScheme as SigningScheme,
   EncodedSwap,
 } from '@cowprotocol/sdk-contracts-ts'
 import { privateKeyToAccount } from 'viem/accounts'

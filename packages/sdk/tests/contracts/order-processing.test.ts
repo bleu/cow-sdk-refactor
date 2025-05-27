@@ -2,8 +2,8 @@ import { createAdapters, TEST_ADDRESS } from '../setup'
 import { setGlobalAdapter, TypedDataDomain } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
-  Order,
-  OrderKind,
+  ContractsOrder as Order,
+  ContractsOrderKind as OrderKind,
   OrderBalance,
   normalizeOrder,
   timestamp,
@@ -13,7 +13,7 @@ import {
   extractOrderUidParams,
   decodeOrder,
   TokenRegistry,
-  Trade,
+  ContractsTrade as Trade,
 } from '@cowprotocol/sdk-contracts-ts'
 import { getAddress } from 'viem'
 

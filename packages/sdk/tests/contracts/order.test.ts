@@ -5,14 +5,14 @@ import * as ethersV6 from 'ethers-v6'
 import { setGlobalAdapter, TypedDataDomain } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
-  Order,
-  OrderKind,
-  SigningScheme,
+  ContractsOrder as Order,
+  ContractsOrderKind as OrderKind,
+  ContractsSigningScheme as SigningScheme,
   hashOrder,
   computeOrderUid,
   extractOrderUidParams,
   signOrder,
-  Signature,
+  ContractsSignature as Signature,
   decodeSigningScheme,
   encodeSigningScheme,
   decodeTradeFlags,
