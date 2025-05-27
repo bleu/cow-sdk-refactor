@@ -113,28 +113,28 @@ describe('Deployment and Proxy', () => {
       ] as [string, string]
 
       // Ethers v5
-      const x1 = ethersV5.utils.getCreate2Address(
+      const ethersV5Address = ethersV5.utils.getCreate2Address(
         deployerAddress,
         SALT,
         ethersV5.utils.keccak256(ethersV5.utils.hexConcat([testArtifact1.bytecode, ...deployArgs])),
       )
 
       // Ethers v5
-      const x3 = ethersV6.getCreate2Address(
+      const ethersV6Address = ethersV6.getCreate2Address(
         deployerAddress,
         SALT,
         ethersV6.keccak256(ethersV6.concat([testArtifact1.bytecode, ...deployArgs])),
       )
 
       // Viem
-      const x2 = getCreate2Address({
+      const viemAddress = getCreate2Address({
         from: deployerAddress,
         salt: SALT,
         bytecodeHash: keccak256(concat([testArtifact1.bytecode as Hex, ...(deployArgs as Hex[])])),
       })
 
-      expect(x1).toEqual(x2)
-      expect(x2).toEqual(x3)
+      expect(ethersV5Address).toEqual(ethersV6Address)
+      expect(ethersV5Address).toEqual(viemAddress)
     })
   })
 
