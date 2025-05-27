@@ -1,4 +1,4 @@
-import { createAdapters, TEST_ADDRESS, TEST_PRIVATE_KEY } from '../setup'
+import { createAdapters, TEST_ADDRESS } from './setup'
 import { setGlobalAdapter } from '@cowprotocol/sdk-common'
 import {
   Api,
@@ -20,7 +20,7 @@ import {
   ContractsEcdsaSignature,
   Eip1271Signature,
   Eip1271SignatureData,
-} from '@cowprotocol/sdk-contracts-ts'
+} from '../src'
 
 // Mock fetch for testing
 global.fetch = jest.fn()

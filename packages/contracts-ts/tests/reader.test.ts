@@ -1,4 +1,4 @@
-import { createAdapters, TEST_ADDRESS, TEST_RPC_URL } from '../setup'
+import { createAdapters, TEST_ADDRESS, TEST_RPC_URL } from './setup'
 import { ethers as ethersV5 } from 'ethers-v5'
 import * as ethersV6 from 'ethers-v6'
 import { createPublicClient, http } from 'viem'
@@ -12,7 +12,7 @@ import {
   TradeSimulationResult,
   InteractionStage,
   OrderBalance,
-} from '@cowprotocol/sdk-contracts-ts'
+} from '../src'
 
 describe('Reader Classes and Storage Functions', () => {
   let adapters: ReturnType<typeof createAdapters>
