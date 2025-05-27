@@ -1,4 +1,4 @@
-import { createAdapters, TEST_ADDRESS } from '../setup'
+import { createAdapters, TEST_ADDRESS } from './setup'
 import { ethers as ethersV5 } from 'ethers-v5'
 import * as ethersV6 from 'ethers-v6'
 import { setGlobalAdapter } from '@cowprotocol/sdk-common'
@@ -10,7 +10,7 @@ import {
   proxyInterface,
   implementationAddress,
   ownerAddress,
-} from '@cowprotocol/sdk-contracts-ts'
+} from '../src'
 import { concat, getCreate2Address, Hex, keccak256 } from 'viem'
 
 describe('Deployment and Proxy', () => {

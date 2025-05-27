@@ -1,4 +1,4 @@
-import { createAdapters } from '../setup'
+import { createAdapters } from './setup'
 import { setGlobalAdapter } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
@@ -9,7 +9,7 @@ import {
   encodeEip1271SignatureData,
   decodeEip1271SignatureData,
   EIP1271_MAGICVALUE,
-} from '@cowprotocol/sdk-contracts-ts'
+} from '../src'
 //@ts-ignore
 import { log } from 'console'
 

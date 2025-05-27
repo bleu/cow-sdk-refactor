@@ -12,3 +12,14 @@ export * from './settlement'
 export * from './sign'
 export * from './swap'
 export * from './vault'
+
+export { SigningScheme as ContractsSigningScheme, OrderKind as ContractsOrderKind } from './types'
+
+export type {
+  EcdsaSigningScheme as ContractsEcdsaSigningScheme,
+  Signature as ContractsSignature,
+  EcdsaSignature as ContractsEcdsaSignature,
+  Trade as ContractsTrade,
+  Order as ContractsOrder,
+  OrderCancellations as ContractsOrderCancellations,
+} from './types'

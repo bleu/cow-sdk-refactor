@@ -1,8 +1,8 @@
 // Improved test structure with better coverage and reduced duplication
 
-import { createAdapters } from '../setup'
+import { createAdapters } from './setup'
 import { setGlobalAdapter } from '@cowprotocol/sdk-common'
-import { grantRequiredRoles } from '@cowprotocol/sdk-contracts-ts'
+import { grantRequiredRoles } from '../src'
 
 // Expected role identifiers - these should match what the function actually grants
 const EXPECTED_VAULT_ROLES = {

@@ -1,4 +1,4 @@
-import { createAdapters, TEST_ADDRESS } from '../setup'
+import { createAdapters, TEST_ADDRESS } from './setup'
 import { setGlobalAdapter, TypedDataDomain } from '@cowprotocol/sdk-common'
 import {
   ContractsTs,
@@ -14,7 +14,7 @@ import {
   decodeOrder,
   TokenRegistry,
   ContractsTrade as Trade,
-} from '@cowprotocol/sdk-contracts-ts'
+} from '../src'
 import { getAddress } from 'viem'
 
 describe('Order Processing Functions', () => {

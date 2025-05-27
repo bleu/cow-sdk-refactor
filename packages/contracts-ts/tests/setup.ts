@@ -10,9 +10,6 @@ import { http } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { sepolia } from 'viem/chains'
 
-//@ts-ignore
-import { log } from 'console'
-
 // Configuration
 // SOME RANDOM GENERATED PRIVATE KEY
 export const TEST_PRIVATE_KEY = '0x4de4739ebdab31d6a36e5ecef027c6ab2fd1a80cf2692c3861ba1ccfeb6cf8b8'
